@@ -222,6 +222,36 @@ let getAllCodeService = (typeInput) => {
         }
     })
 }
+let handleRegister = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            //check email exist
+            let check = await checkUserEmail(data.email);
+            if (check) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "Your email is already in used. Plz check lai ho minh nha"
+                })
+            }
+            else {
+                let hashpassword = await hashUserPassword(data.password);
+                await db.User.create({
+                    email: data.email,
+                    password: hashpassword,
+                    firstName: data.firstName,
+                    lastName: data.lastName,
+                    roleId: 'R3',
+                })
+                resolve({
+                    errCode: 0,
+                    errMessage: 'OK'
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleUserLogin: handleUserLogin,
     checkUserEmail: checkUserEmail,
@@ -231,4 +261,5 @@ module.exports = {
     deleteUser: deleteUser,
     updateUserData: updateUserData,
     getAllCodeService: getAllCodeService,
+    handleRegister: handleRegister
 }

@@ -1,6 +1,8 @@
 import db from "../models/index";
 import bcrypt from "bcryptjs"
 const salt = bcrypt.genSaltSync(10);
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 let handleUserLogin = (email, password) => {
     return new Promise(async (resolve, reject) => {
@@ -19,6 +21,8 @@ let handleUserLogin = (email, password) => {
                         userData.errCode = 0;
                         userData.errMessage = 'Ok';
                         delete user.password;
+                        let token = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JSON_SECRET);
+                        userData.accessToken = token;
                         userData.user = user;
                     }
                     else {

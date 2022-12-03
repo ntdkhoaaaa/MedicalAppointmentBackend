@@ -5,6 +5,8 @@ import doctorController from "../controllers/doctorController"
 import patientController from "../controllers/patientController";
 import specialtyController from "../controllers/specialtyController";
 import clinicController from "../controllers/clinicController";
+import authJwt from "../midlleware/authJwt";
+
 let router = express.Router();
 
 let initWebRoute = (app) => {
@@ -52,6 +54,8 @@ let initWebRoute = (app) => {
 
     router.post('/api/add-new-clinic', clinicController.postNewClinic);
     router.get('/api/get-all-clinics', clinicController.getAllClinics)
+
+    router.get("/api/check-permission", authJwt.checkPermissionByToken);
 
 
     return app.use("/", router)

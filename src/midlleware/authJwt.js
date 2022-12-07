@@ -43,7 +43,7 @@ let checkPermissionByToken = async (req, res) => {
                 role: 'R0'
             });
         }
-        jwt.verify(token, process.env.JSON_SECRET_ACCESS, (err, decoded) => {
+        jwt.verify(token, process.env.JSON_SECRET_ACCESS, async (err, decoded) => {
             if (err) {
                 return res.status(200).json({
                     errCode: 3,
@@ -51,9 +51,15 @@ let checkPermissionByToken = async (req, res) => {
                 });
             }
             else {
+                let data = await db.User.findOne({
+                    attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id'],
+                    where: { id: decoded.id },
+                    raw: true
+                });
                 return res.status(200).json({
                     errCode: 0,
-                    role: decoded.roleId
+                    role: decoded.roleId,
+                    userInfo: data
                 });
             }
         });

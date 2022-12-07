@@ -6,6 +6,7 @@ import connectDB from './config/connectDB';
 import cors from 'cors'
 
 const cookieParser = require("cookie-parser");
+const schedule = require('node-schedule');
 
 // import cors from 'cors';
 require('dotenv').config();
@@ -49,3 +50,6 @@ let port = process.env.PORT || 6969;
 app.listen(port, () => {
     console.log("Backend Nodejs is running on the port: " + port);
 })
+// const job = schedule.scheduleJob('*/2 * * * * *', function () {
+//     console.log('The answer to life, the universe, and everything!');
+// });

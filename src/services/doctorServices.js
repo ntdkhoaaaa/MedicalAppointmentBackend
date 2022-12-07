@@ -70,7 +70,7 @@ let getAllDoctors = (req) => {
                 }
                 resolve({
                     errCode: 0,
-                    data: doctors
+                    data: [doctors]
                 })
             } else {
                 resolve({

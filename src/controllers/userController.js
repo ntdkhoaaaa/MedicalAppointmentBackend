@@ -22,7 +22,8 @@ let handleLogin = async (req, res) => {
             errCode: userData.errCode,
             message: userData.errMessage,
             user: userData.user ? userData.user : {},
-            accessToken: userData.accessToken
+            accessToken: userData.accessToken,
+            refreshToken: userData.refreshToken
         }
     )
     return res
@@ -93,6 +94,20 @@ let handleRegister = async (req, res) => {
         })
     }
 }
+let handleRefreshToken = async (req, res) => {
+    try {
+        let data = await userService.handleRefreshToken(req.body);
+        console.log('db', data)
+        return res.status(200).json(data);
+    } catch (error) {
+        console.log(error)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'err from server',
+
+        })
+    }
+}
 module.exports = {
     handleLogin: handleLogin,
     handleGetAllUser: handleGetAllUser,
@@ -100,5 +115,6 @@ module.exports = {
     handleEditUser: handleEditUser,
     handleDeleteUser: handleDeleteUser,
     getAllCode: getAllCode,
-    handleRegister: handleRegister
+    handleRegister: handleRegister,
+    handleRefreshToken: handleRefreshToken
 }

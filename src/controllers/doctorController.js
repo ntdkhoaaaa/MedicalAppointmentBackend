@@ -15,9 +15,10 @@ let getTopDoctorHome = async (req, res) => {
 }
 let getAllDoctors = async (req, res) => {
     try {
-        let doctors = await doctorServices.getAllDoctors();
+        let doctors = await doctorServices.getAllDoctors(req.body);
         return res.status(200).json(doctors)
     } catch (e) {
+        console.log(e)
         return res.status(200).json({
             errCode: -1,
             message: 'Error from server'

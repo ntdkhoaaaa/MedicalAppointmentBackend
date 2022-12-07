@@ -31,11 +31,11 @@ let initWebRoute = (app) => {
     router.put('/api/edit-user', userController.handleEditUser);
 
     router.get('/api/get-top-doctor-home', doctorController.getTopDoctorHome)
-    router.get('/api/get-all-doctors', doctorController.getAllDoctors)
+    router.get('/api/get-all-doctors', authJwt.verifyToken, doctorController.getAllDoctors)
     router.get('/api/get-detailed-doctor-byId', doctorController.getDetailedDoctorById);
     router.get('/api/get-all-markdown', doctorController.getAllMarkdown);
     router.get('/api/get-schedule-byDate', doctorController.getScheduleByDate);
-    router.get('/api/get-selected-schedule-byId', doctorController.getSelectedScheduleById)
+    router.get('/api/get-selected-schedule-byId', authJwt.verifyToken, doctorController.getSelectedScheduleById)
     router.get('/api/get-extra-infor-doctor-byId', doctorController.getExtraInforDoctorById)
     router.get('/api/get-profile-doctor-byId', doctorController.getProfileDoctorById)
 
@@ -56,7 +56,7 @@ let initWebRoute = (app) => {
     router.get('/api/get-all-clinics', clinicController.getAllClinics)
 
     router.get("/api/check-permission", authJwt.checkPermissionByToken);
-
+    router.post('/api/refresh-token', userController.handleRefreshToken);
 
     return app.use("/", router)
 }

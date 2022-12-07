@@ -38,6 +38,7 @@ let initWebRoute = (app) => {
     router.get('/api/get-selected-schedule-byId', authJwt.verifyToken, doctorController.getSelectedScheduleById)
     router.get('/api/get-extra-infor-doctor-byId', doctorController.getExtraInforDoctorById)
     router.get('/api/get-profile-doctor-byId', doctorController.getProfileDoctorById)
+    router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor)
 
     router.post('/api/bulk-create-schedule', doctorController.bulkCreateSchedule);
     router.post('/api/save-infor-doctors', doctorController.postInforDoctors);

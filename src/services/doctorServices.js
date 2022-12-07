@@ -493,6 +493,93 @@ let getProfileDoctorById = (doctorId) => {
         }
     })
 }
+let getListPatientForDoctor = (doctorId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let a = '11';
+            if (!doctorId || !date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter'
+                })
+            }
+            else {
+                let dataBooking = await db.Booking.findAll({
+                    where: {
+                        statusId: 'S2',
+                        doctorId: doctorId,
+                        date: date
+                    },
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'patientData',
+                            attributes: ['email', 'firstName', 'lastName', 'gender'],
+                            include: [
+                                {
+                                    model: db.Allcode,
+                                    as: 'genderData',
+                                    attributes: ['valueEn', 'valueVi'],
+                                }
+                            ]
+                        },
+                        {
+                            model: db.Allcode,
+                            as: 'timeTypeDataPatient',
+                            attributes: ['valueEn', 'valueVi']
+                        }
+                    ],
+                    raw: false,
+                    nest: true
+
+
+                })
+                // let dataUser = await db.User.findAll({
+                //     where: {
+                //         lastName: { [Op.substring]: 'Doctor' },
+                //         // doctorId: doctorId,
+                //         // date: date
+
+                //     },
+                //     attributes: ['firstName', 'lastName'],
+                // })
+                // //add arr2 to arr1
+                // Array.prototype.push.apply(dataBooking, dataUser);
+
+                // include: [
+                //     {
+                //         model: db.User,
+                //         as: 'patientData',
+                //         attributes: ['email', 'firstName', 'lastName', 'gender'],
+                //         include: [
+                //             {
+                //                 model: db.Allcode,
+                //                 as: 'genderData',
+                //                 attributes: ['valueEn', 'valueVi'],
+                //             }
+                //         ]
+                //     },
+                //     {
+                //         model: db.Allcode,
+                //         as: 'timeTypeDataPatient',
+                //         attributes: ['valueEn', 'valueVi']
+                //     }
+                // ],
+                // raw: false,
+                // nest: true
+
+                if (!dataBooking) dataBooking = {}
+                resolve({
+                    errCode: 0,
+                    data: dataBooking
+                })
+            }
+        } catch (e) {
+            console.log(e);
+            reject(e)
+        }
+    })
+}
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctors: getAllDoctors,
@@ -505,5 +592,5 @@ module.exports = {
     deleteSelectedSchedule: deleteSelectedSchedule,
     getExtraInforDoctorById: getExtraInforDoctorById,
     getProfileDoctorById: getProfileDoctorById,
-
+    getListPatientForDoctor: getListPatientForDoctor
 }

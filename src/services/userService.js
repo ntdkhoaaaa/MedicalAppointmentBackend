@@ -1,6 +1,8 @@
 import db from "../models/index";
 import bcrypt from "bcryptjs"
 const salt = bcrypt.genSaltSync(10);
+const jwt = require("jsonwebtoken");
+const cookieParser = require("cookie-parser");
 
 let handleUserLogin = (email, password) => {
     return new Promise(async (resolve, reject) => {
@@ -9,16 +11,19 @@ let handleUserLogin = (email, password) => {
             let isExist = await checkUserEmail(email);
             if (isExist) {
                 let user = await db.User.findOne({
-                    attributes: ['email', 'roleId', 'password', 'firstName', 'lastName'],
+                    attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName'],
                     where: { email: email },
                     raw: true
                 });
                 if (user) {
                     let check = await bcrypt.compareSync(password, user.password);
+                    console.log('wfwefe')
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'Ok';
                         delete user.password;
+                        let token = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JSON_SECRET);
+                        userData.accessToken = token;
                         userData.user = user;
                     }
                     else {

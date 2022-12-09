@@ -22,7 +22,9 @@ let getTopDoctorHome = (limitInput) => {
             })
             if (user) {
                 user.forEach(element => {
-                    element.image = new Buffer(element.image, 'base64').toString('binary');
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
                 });
                 // data.image = new Buffer(data.image, 'base64').toString('binary');
             }
@@ -448,18 +450,44 @@ let getProfileDoctorById = (doctorId) => {
                     raw: false,
                     nest: true
                 })
-                if(data)
-                {
-                    if(data.image)
-                    {
+                if (data) {
+                    if (data.image) {
                         data.image = new Buffer(data.image, 'base64').toString('binary');
                     }
                 }
-                else data={}
+                else data = {}
                 // if (data && data.image) {
                 //     data.image = new Buffer(data.image, 'base64').toString('binary');
                 // }
                 // if (!data) data = {}
+                resolve({
+                    errCode: 0,
+                    data: data
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+let getListPatientForDoctor = (doctorId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId && !date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter'
+                })
+            }
+            else {
+                let data = await db.Booking.findAll({
+                    where: {
+                        statusId: 'S2',
+                        doctorId: doctorId,
+                        date: date
+                    }
+                })
+                
                 resolve({
                     errCode: 0,
                     data: data
@@ -482,5 +510,6 @@ module.exports = {
     deleteSelectedSchedule: deleteSelectedSchedule,
     getExtraInforDoctorById: getExtraInforDoctorById,
     getProfileDoctorById: getProfileDoctorById,
+    getListPatientForDoctor: getListPatientForDoctor
 
 }

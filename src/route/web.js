@@ -6,6 +6,8 @@ import doctorController from "../controllers/doctorController"
 import patientController from "../controllers/patientController";
 import specialtyController from "../controllers/specialtyController";
 import clinicController from "../controllers/clinicController";
+import authJwt from "../midlleware/authJwt";
+
 let router = express.Router();
 // let passport = require('passport');
 let initWebRoute = (app) => {
@@ -53,39 +55,19 @@ let initWebRoute = (app) => {
 
     router.post('/api/add-new-clinic', clinicController.postNewClinic);
     router.get('/api/get-all-clinics', clinicController.getAllClinics);
+    router.get('/api/get-detail-clinic-byId', clinicController.getDetailClinicById)
+
+
+
+    router.get('/api/get-list-patient-for-doctor',doctorController.getListPatientForDoctor);
+
     // router.get(
     //     '/google/callback',
     //     passport.authenticate('google', {
     //         successRedirect: process.env.URL_REACT,
     //         failureRedirect: "/login/failed",
 
-    //     })
-    // );
-    // router.get('/google', passport.authenticate('google', ['profile', 'email']))
-    // router.get('/logout', (req, res) => {
-    //     req.logout();
-    //     res.redirect(process.env.URL_REACT)
-    // })
-    // router.get('/login/failed', (req, res) => {
-    //     if (req.user) {
-    //         res.status(200).json({
-    //             error: false,
-    //             message: "Successfully logged in",
-    //             user: req.user
-    //         });
-    //     } else {
-    //         res.status(403).json({
-    //             error: true,
-    //             message: "Not Authorized",
-    //         });
-    //     }
-    // })
-    // router.get('/login/failed', (req, res) => {
-    //     res.status(401).json({
-    //         error: true,
-    //         message: "Log in failure",
-    //     });
-    // })
+    router.get("/api/check-permission", authJwt.checkPermissionByToken);
 
     return app.use("/", router)
 }

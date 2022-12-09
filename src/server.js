@@ -3,38 +3,15 @@ import bodyParser from "body-parser";
 import viewEngine from "./config/viewEngine";
 import initWebRoutes from './route/web';
 import connectDB from './config/connectDB';
-// import passport from './passport'
+import cors from 'cors'
+
+const cookieParser = require("cookie-parser");
+
 // import cors from 'cors';
 require('dotenv').config();
-
-//auth google
-// const express = require('express');
-// const cors = require('cors');
-// const passport = require('passport');
-// const cookieSession = require('cookie-session');
-// const passportSetup = require('./passport')
-// const authRote = require('./route/web')
-
 let app = express();
-// app.use(
-//     cookieSession({
-//         name: 'secssion',
-//         keys: ['cyberwolve'],
-//         maxAge: 24 * 60 * 60 * 100,
-//     })
-// )
-// app.use(passport.initialize())
-// app.use(passport.session())
-
-// app.use(
-//     cors({
-//         origin: 'http://localhost:3000',
-//         methods: "GET,POST,PUT,DELETE",
-//         credentials: true
-//     })
-// )
-// app.use('/auth',authRote)
-// app.use(cors({ origin: true }));
+app.use(cors({ origin: true }));
+app.use(cookieParser())
 app.use(function (req, res, next) {
 
     // Website you wish to allow to connect
@@ -55,8 +32,8 @@ app.use(function (req, res, next) {
 });
 
 
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }))
 
 
 app.use(bodyParser.json({ limit: '50mb' }));

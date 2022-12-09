@@ -116,10 +116,6 @@ let getDetailSpecialtyById = (id, location) => {
 
 
             }
-            resolve({
-                errCode: 0,
-                data: specialties
-            })
         }
         catch (e) {
             reject(e);

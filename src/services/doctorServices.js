@@ -37,25 +37,50 @@ let getTopDoctorHome = (limitInput) => {
         }
     })
 }
-let getAllDoctors = () => {
+let getAllDoctors = (req) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let doctors = await db.User.findAll({
-                where: { roleId: 'R2' },
-                attributes: {
-                    exclude: ['password']
-                },
-            })
-            if (doctors) {
-                doctors.forEach(element => {
-                    element.image = new Buffer(element.image, 'base64').toString('binary');
-                });
-                // data.image = new Buffer(data.image, 'base64').toString('binary');
+            if (req.authRole === 'R1') {
+                let doctors = await db.User.findAll({
+                    where: { roleId: 'R2' },
+                    attributes: {
+                        exclude: ['password']
+                    },
+                })
+                if (doctors) {
+                    doctors.forEach(element => {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    });
+                    // data.image = new Buffer(data.image, 'base64').toString('binary');
+                }
+                resolve({
+                    errCode: 0,
+                    data: doctors
+                })
+            } else if (req.authRole === 'R2') {
+                let doctors = await db.User.findOne({
+                    where: { id: req.authId },
+                    attributes: {
+                        exclude: ['password']
+                    },
+                })
+                if (doctors) {
+                    // doctors.forEach(element => {
+                    //     element.image = new Buffer(element.image, 'base64').toString('binary');
+                    // });
+                    doctors.image = new Buffer(doctors.image, 'base64').toString('binary');
+                }
+                resolve({
+                    errCode: 0,
+                    data: [doctors]
+                })
+            } else {
+                resolve({
+                    errCode: 0,
+                    data: {}
+                })
             }
-            resolve({
-                errCode: 0,
-                data: doctors
-            })
+
         }
         catch (e) {
             reject(e);
@@ -473,24 +498,24 @@ let getProfileDoctorById = (doctorId) => {
 let getListPatientForDoctor = (doctorId, date) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!doctorId && !date) {
+            if (!doctorId || !date) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameter'
                 })
             }
             else {
-                let data = await db.Booking.findAll({
+                let dataBooking = await db.Booking.findAll({
                     where: {
                         statusId: 'S2',
                         doctorId: doctorId,
                         date: date
                     }
                 })
-                
+
                 resolve({
                     errCode: 0,
-                    data: data
+                    data: dataBooking
                 })
             }
         } catch (e) {
@@ -511,5 +536,4 @@ module.exports = {
     getExtraInforDoctorById: getExtraInforDoctorById,
     getProfileDoctorById: getProfileDoctorById,
     getListPatientForDoctor: getListPatientForDoctor
-
 }

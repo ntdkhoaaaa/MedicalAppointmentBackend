@@ -51,11 +51,13 @@ let postBookingAppointment = (data) => {
                         defaults: {
                             statusId: 'S1',
                             prognostic: data.reason,
-                            forWho: data.forwho,
+                            forWho: data.firstName + ' ' + data.lastName + '(' + data.forwho + ')',
                             bookingDate: data.pickDate,
                             patientAge: data.patientAge,
-                            token: token
-
+                            gender: data.genderIdentity,
+                            token: token,
+                            phoneNumber: data.phoneNumber,
+                            address: data.address,
                         }
 
                     })

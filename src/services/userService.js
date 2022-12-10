@@ -11,19 +11,30 @@ let handleUserLogin = (email, password) => {
             let isExist = await checkUserEmail(email);
             if (isExist) {
                 let user = await db.User.findOne({
-                    attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName'],
+                    attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName', 'phoneNumber', 'address', 'gender'],
                     where: { email: email },
                     raw: true
                 });
                 if (user) {
                     let check = await bcrypt.compareSync(password, user.password);
-                    console.log('wfwefe')
+                    // console.log('wfwefe')
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'Ok';
                         delete user.password;
-                        let token = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JSON_SECRET);
-                        userData.accessToken = token;
+                        let tokenAccess = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JSON_SECRET_ACCESS, {
+                            expiresIn: '30s'
+                        });
+                        let tokenRefresh = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JSON_SECRET_REFRESH, {
+                            expiresIn: '2m'
+                        });
+                        await db.Refresh_Token.create(
+                            {
+                                refreshToken: tokenRefresh,
+                                userId: user.id
+                            })
+                        userData.accessToken = tokenAccess;
+                        userData.refreshToken = tokenRefresh;
                         userData.user = user;
                     }
                     else {
@@ -83,6 +94,7 @@ let getAllUsers = (userId) => {
                 }
             }
             if (userId && userId !== 'ALL') {
+                console.log('check profilee user')
                 users = await db.User.findOne({
                     where: { id: userId },
                     attributes: {
@@ -203,6 +215,40 @@ let updateUserData = (data) => {
         }
     })
 }
+let updateUserInforInProfile = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id) {
+                resolve({
+                    errCode: 2,
+                    errMessage: "Missing required parameters!"
+                })
+            }
+            let user = await db.User.findOne({
+                where: { id: data.id },
+            })
+            if (user) {
+                user.address = data.address;
+                user.gender = data.gender;
+                user.phoneNumber = data.phoneNumber;
+                user.image = data.avatar;
+                await user.save();
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Updated'
+                })
+            }
+            else {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'User not found!'
+                });
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
 let getAllCodeService = (typeInput) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -257,6 +303,64 @@ let handleRegister = (data) => {
         }
     })
 }
+
+let handleRefreshToken = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let info = await db.Refresh_Token.findOne({
+                attributes: ['userId', 'refreshToken'],
+                where: { refreshToken: data.refreshToken },
+                include: [
+                    {
+                        model: db.User,
+                        attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id']
+                    }
+                ],
+                nest: true,
+                raw: false
+            });
+            if (info) {
+                let tokenAccess = jwt.sign({ id: info.User.id, roleId: info.User.roleId }, process.env.JSON_SECRET_ACCESS, {
+                    expiresIn: '30s'
+                });
+                jwt.verify(info.refreshToken, process.env.JSON_SECRET_REFRESH, async (err, decoded) => {
+                    if (err) {
+                        let tokenRefresh = jwt.sign({ id: info.User.id, roleId: info.User.roleId }, process.env.JSON_SECRET_REFRESH, {
+                            expiresIn: '2m'
+                        });
+                        await db.Refresh_Token.update(
+                            {
+                                refreshToken: tokenRefresh
+                            },
+                            {
+                                where: { refreshToken: info.refreshToken }
+                            })
+                        resolve({
+                            errCode: 0,
+                            accessToken: tokenAccess,
+                            refreshToken: tokenRefresh,
+                            user: info.User,
+                        })
+                    }
+                    resolve({
+                        errCode: 0,
+                        accessToken: tokenAccess,
+                        refreshToken: info.refreshToken,
+                        user: info.User
+                    })
+                });
+            } else {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'freshToken invalid'
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+
 module.exports = {
     handleUserLogin: handleUserLogin,
     checkUserEmail: checkUserEmail,
@@ -266,5 +370,7 @@ module.exports = {
     deleteUser: deleteUser,
     updateUserData: updateUserData,
     getAllCodeService: getAllCodeService,
-    handleRegister: handleRegister
+    handleRegister: handleRegister,
+    updateUserInforInProfile: updateUserInforInProfile,
+    handleRefreshToken: handleRefreshToken
 }

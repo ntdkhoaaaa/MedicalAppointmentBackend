@@ -30,15 +30,17 @@ let initWebRoute = (app) => {
     router.delete('/api/delete-user', userController.handleDeleteUser);
 
     router.put('/api/edit-user', userController.handleEditUser);
+    router.put('/api/edit-on-own-user-infor', userController.updateUserInforInProfile);
 
     router.get('/api/get-top-doctor-home', doctorController.getTopDoctorHome)
-    router.get('/api/get-all-doctors', doctorController.getAllDoctors)
+    router.get('/api/get-all-doctors', authJwt.verifyToken, doctorController.getAllDoctors)
     router.get('/api/get-detailed-doctor-byId', doctorController.getDetailedDoctorById);
     router.get('/api/get-all-markdown', doctorController.getAllMarkdown);
     router.get('/api/get-schedule-byDate', doctorController.getScheduleByDate);
-    router.get('/api/get-selected-schedule-byId', doctorController.getSelectedScheduleById)
+    router.get('/api/get-selected-schedule-byId', authJwt.verifyToken, doctorController.getSelectedScheduleById)
     router.get('/api/get-extra-infor-doctor-byId', doctorController.getExtraInforDoctorById)
     router.get('/api/get-profile-doctor-byId', doctorController.getProfileDoctorById)
+    router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor)
 
     router.post('/api/bulk-create-schedule', doctorController.bulkCreateSchedule);
     router.post('/api/save-infor-doctors', doctorController.postInforDoctors);
@@ -59,7 +61,7 @@ let initWebRoute = (app) => {
 
 
 
-    router.get('/api/get-list-patient-for-doctor',doctorController.getListPatientForDoctor);
+    router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor);
 
     // router.get(
     //     '/google/callback',
@@ -68,6 +70,7 @@ let initWebRoute = (app) => {
     //         failureRedirect: "/login/failed",
 
     router.get("/api/check-permission", authJwt.checkPermissionByToken);
+    router.post('/api/refresh-token', userController.handleRefreshToken);
 
     return app.use("/", router)
 }

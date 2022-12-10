@@ -1,4 +1,5 @@
 import express from "express";
+
 import homeController from "../controllers/homeController"
 import userController from "../controllers/userController"
 import doctorController from "../controllers/doctorController"
@@ -8,7 +9,7 @@ import clinicController from "../controllers/clinicController";
 import authJwt from "../midlleware/authJwt";
 
 let router = express.Router();
-
+// let passport = require('passport');
 let initWebRoute = (app) => {
     router.get('/', homeController.getHomePage);
     router.get('/ntdk', homeController.getAboutPage);
@@ -29,6 +30,7 @@ let initWebRoute = (app) => {
     router.delete('/api/delete-user', userController.handleDeleteUser);
 
     router.put('/api/edit-user', userController.handleEditUser);
+    router.put('/api/edit-on-own-user-infor', userController.updateUserInforInProfile);
 
     router.get('/api/get-top-doctor-home', doctorController.getTopDoctorHome)
     router.get('/api/get-all-doctors', authJwt.verifyToken, doctorController.getAllDoctors)
@@ -54,7 +56,18 @@ let initWebRoute = (app) => {
     router.get('/api/get-detail-specialty-byId', specialtyController.getDetailSpecialtyById)
 
     router.post('/api/add-new-clinic', clinicController.postNewClinic);
-    router.get('/api/get-all-clinics', clinicController.getAllClinics)
+    router.get('/api/get-all-clinics', clinicController.getAllClinics);
+    router.get('/api/get-detail-clinic-byId', clinicController.getDetailClinicById)
+
+
+
+    router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor);
+
+    // router.get(
+    //     '/google/callback',
+    //     passport.authenticate('google', {
+    //         successRedirect: process.env.URL_REACT,
+    //         failureRedirect: "/login/failed",
 
     router.get("/api/check-permission", authJwt.checkPermissionByToken);
     router.post('/api/refresh-token', userController.handleRefreshToken);

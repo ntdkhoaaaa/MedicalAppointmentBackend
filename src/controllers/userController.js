@@ -58,6 +58,11 @@ let handleEditUser = async (req, res) => {
     let message = await userService.updateUserData(data);
     return res.status(200).json(message);
 }
+let updateUserInforInProfile = async (req, res) => {
+    let data = req.body;
+    let message = await userService.updateUserInforInProfile(data);
+    return res.status(200).json(message);
+}
 let handleDeleteUser = async (req, res) => {
     if (!req.body.id) {
         return res.status(200).json({
@@ -116,5 +121,6 @@ module.exports = {
     handleDeleteUser: handleDeleteUser,
     getAllCode: getAllCode,
     handleRegister: handleRegister,
-    handleRefreshToken: handleRefreshToken
+    handleRefreshToken: handleRefreshToken,
+    updateUserInforInProfile: updateUserInforInProfile
 }

@@ -19,7 +19,7 @@ let postNewClinic = (data) => {
                     nameEn: data.nameEn,
                     address: data.address,
                     addressEn: data.addressEn,
-                    image: data.imageBase64,
+                    // image: data.imageBase64,
                     descriptionHTML: data.descriptionHTML,
                     descriptionMarkdown: data.descriptionMarkdown
                 })
@@ -43,9 +43,12 @@ let getAllClinics = () => {
                     exclude: ['descriptionMarkdown', 'descriptionHTML']
                 },
             })
+            // console.log(clinics)
             if (clinics) {
                 clinics.forEach(element => {
-                    element.image = new Buffer(element.image, 'base64').toString('binary');
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
                 });
             }
             resolve({
@@ -58,7 +61,46 @@ let getAllClinics = () => {
         }
     })
 }
+let getDetailClinicById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            }
+            else {
+                let data = await db.Clinics.findOne({
+                    where: {
+                        id: id
+                    },
+                    attributes: ['descriptionHTML', 'descriptionMarkdown'],
+                    include: [
+                        { model: db.Doctor_Infor, as: 'clinicData', attributes: { exclude: ['count'] } }
+                    ]
+                })
+                if (data) {
+                    resolve({
+                        errCode: 0,
+                        data: data
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 0,
+                        data: {}
+                    })
+                }
+            }
+        }
+        catch (e) {
+            reject(e);
+        }
+    })
+}
 module.exports = {
     postNewClinic: postNewClinic,
-    getAllClinics: getAllClinics
+    getAllClinics: getAllClinics,
+    getDetailClinicById: getDetailClinicById
 }

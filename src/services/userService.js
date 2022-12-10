@@ -11,12 +11,13 @@ let handleUserLogin = (email, password) => {
             let isExist = await checkUserEmail(email);
             if (isExist) {
                 let user = await db.User.findOne({
-                    attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id'],
+                    attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName', 'phoneNumber', 'address', 'gender'],
                     where: { email: email },
                     raw: true
                 });
                 if (user) {
                     let check = await bcrypt.compareSync(password, user.password);
+                    // console.log('wfwefe')
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'Ok';
@@ -93,6 +94,7 @@ let getAllUsers = (userId) => {
                 }
             }
             if (userId && userId !== 'ALL') {
+                console.log('check profilee user')
                 users = await db.User.findOne({
                     where: { id: userId },
                     attributes: {
@@ -193,6 +195,40 @@ let updateUserData = (data) => {
                 user.address = data.address;
                 user.roleId = data.roleId;
                 user.positionId = data.positionId;
+                user.gender = data.gender;
+                user.phoneNumber = data.phoneNumber;
+                user.image = data.avatar;
+                await user.save();
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Updated'
+                })
+            }
+            else {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'User not found!'
+                });
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+let updateUserInforInProfile = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id) {
+                resolve({
+                    errCode: 2,
+                    errMessage: "Missing required parameters!"
+                })
+            }
+            let user = await db.User.findOne({
+                where: { id: data.id },
+            })
+            if (user) {
+                user.address = data.address;
                 user.gender = data.gender;
                 user.phoneNumber = data.phoneNumber;
                 user.image = data.avatar;
@@ -335,5 +371,6 @@ module.exports = {
     updateUserData: updateUserData,
     getAllCodeService: getAllCodeService,
     handleRegister: handleRegister,
+    updateUserInforInProfile: updateUserInforInProfile,
     handleRefreshToken: handleRefreshToken
 }

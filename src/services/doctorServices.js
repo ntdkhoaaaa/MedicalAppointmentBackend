@@ -22,7 +22,9 @@ let getTopDoctorHome = (limitInput) => {
             })
             if (user) {
                 user.forEach(element => {
-                    element.image = new Buffer(element.image, 'base64').toString('binary');
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
                 });
                 // data.image = new Buffer(data.image, 'base64').toString('binary');
             }
@@ -496,7 +498,6 @@ let getProfileDoctorById = (doctorId) => {
 let getListPatientForDoctor = (doctorId, date) => {
     return new Promise(async (resolve, reject) => {
         try {
-            let a = '11';
             if (!doctorId || !date) {
                 resolve({
                     errCode: 1,
@@ -509,73 +510,15 @@ let getListPatientForDoctor = (doctorId, date) => {
                         statusId: 'S2',
                         doctorId: doctorId,
                         date: date
-                    },
-                    include: [
-                        {
-                            model: db.User,
-                            as: 'patientData',
-                            attributes: ['email', 'firstName', 'lastName', 'gender'],
-                            include: [
-                                {
-                                    model: db.Allcode,
-                                    as: 'genderData',
-                                    attributes: ['valueEn', 'valueVi'],
-                                }
-                            ]
-                        },
-                        {
-                            model: db.Allcode,
-                            as: 'timeTypeDataPatient',
-                            attributes: ['valueEn', 'valueVi']
-                        }
-                    ],
-                    raw: false,
-                    nest: true
-
-
+                    }
                 })
-                // let dataUser = await db.User.findAll({
-                //     where: {
-                //         lastName: { [Op.substring]: 'Doctor' },
-                //         // doctorId: doctorId,
-                //         // date: date
 
-                //     },
-                //     attributes: ['firstName', 'lastName'],
-                // })
-                // //add arr2 to arr1
-                // Array.prototype.push.apply(dataBooking, dataUser);
-
-                // include: [
-                //     {
-                //         model: db.User,
-                //         as: 'patientData',
-                //         attributes: ['email', 'firstName', 'lastName', 'gender'],
-                //         include: [
-                //             {
-                //                 model: db.Allcode,
-                //                 as: 'genderData',
-                //                 attributes: ['valueEn', 'valueVi'],
-                //             }
-                //         ]
-                //     },
-                //     {
-                //         model: db.Allcode,
-                //         as: 'timeTypeDataPatient',
-                //         attributes: ['valueEn', 'valueVi']
-                //     }
-                // ],
-                // raw: false,
-                // nest: true
-
-                if (!dataBooking) dataBooking = {}
                 resolve({
                     errCode: 0,
                     data: dataBooking
                 })
             }
         } catch (e) {
-            console.log(e);
             reject(e)
         }
     })

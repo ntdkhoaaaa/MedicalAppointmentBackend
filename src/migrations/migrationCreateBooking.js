@@ -38,6 +38,15 @@ module.exports = {
             token: {
                 type: Sequelize.STRING
             },
+            address: {
+                type: Sequelize.STRING
+            },
+            gender: {
+                type: Sequelize.STRING
+            },
+            phoneNumber: {
+                type: Sequelize.STRING
+            },
             createdAt: {
                 allowNull: false,
                 type: Sequelize.DATE

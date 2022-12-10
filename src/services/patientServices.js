@@ -156,7 +156,6 @@ let getBookingInfoByProfile = (userId) => {
         }
     })
 }
-
 module.exports = {
     postBookingAppointment: postBookingAppointment,
     postVerifyBooking: postVerifyBooking,

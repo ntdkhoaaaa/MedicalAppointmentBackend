@@ -150,6 +150,7 @@ let saveDetailedInfor = (inputData) => {
                     doctorInfor.provinceId = inputData.selectedProvince;
                     doctorInfor.addressClinic = inputData.addressClinic;
                     doctorInfor.nameClinic = inputData.nameClinic;
+                    doctorInfor.nameSpecialty = inputData.nameSpecialty
                     doctorInfor.clinicId = inputData.selectedClinic;
                     doctorInfor.specialtyId = inputData.selectedSpecialty;
                     doctorInfor.note = inputData.note;
@@ -168,6 +169,7 @@ let saveDetailedInfor = (inputData) => {
                         provinceId: inputData.selectedProvince,
                         addressClinic: inputData.addressClinic,
                         nameClinic: inputData.nameClinic,
+                        nameSpecialty: inputData.nameSpecialty,
                         note: inputData.note,
                         clinicId: inputData.selectedClinic,
                         specialtyId: inputData.selectedSpecialty,

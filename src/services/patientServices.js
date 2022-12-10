@@ -112,7 +112,50 @@ let postVerifyBooking = (data) => {
         }
     })
 }
+let getBookingInfoByProfile = (userId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!userId) {
+                resolve({
+                    errCode: -1,
+                    errMessage: 'Missing parametter ...'
+                })
+            }
+            else {
+                let dataBooking = await db.Booking.findAll({
+                    where: {
+                        patientId: userId
+                    },
+                    include: [
+                        {
+                            model: db.User, as: 'doctorInfoData',
+                            attributes: ['email', 'firstName', 'lastName', 'gender', 'id'],
+                            include: [
+                                {
+                                    model: db.Doctor_Infor
+                                }
+                            ],
+                            plain: true,
+                            raw: false,
+                            nest: true,
+                        },
+                    ],
+                    raw: false,
+                    nest: true,
+
+                })
+                resolve(dataBooking)
+
+            }
+        } catch (e) {
+            console.log(e)
+            reject(e)
+
+        }
+    })
+}
 module.exports = {
     postBookingAppointment: postBookingAppointment,
-    postVerifyBooking: postVerifyBooking
+    postVerifyBooking: postVerifyBooking,
+    getBookingInfoByProfile: getBookingInfoByProfile
 }

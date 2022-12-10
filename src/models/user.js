@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       User.hasOne(models.Refresh_Token, { foreignKey: 'userId' })
       User.hasMany(models.Schedule, { foreignKey: 'doctorId', as: 'doctorData' })
       User.hasMany(models.Booking, { foreignKey: 'patientId', as: 'patientData' })
-
+      User.hasMany(models.Booking, { foreignKey: 'doctorId', as: 'doctorInfoData' })
       // define association here
     }
   };

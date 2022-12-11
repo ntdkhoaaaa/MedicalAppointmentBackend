@@ -63,6 +63,8 @@ let initWebRoute = (app) => {
     router.get('/api/get-all-appointment-of-user', patientController.getBookingInfoByProfile)
     router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor);
 
+    router.post('/api/cancel-booking', patientController.cancelBookingformPatient)
+
     // router.get(
     //     '/google/callback',
     //     passport.authenticate('google', {

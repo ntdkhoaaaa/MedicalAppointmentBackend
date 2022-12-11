@@ -17,56 +17,49 @@ let postBookingAppointment = (data) => {
             }
             else {
                 let token = uuidv4();
-                await sendEmailSimple.sendEmailSimple({
-                    receiverMail: data.email,
-                    patientName: data.language === 'vi' ? `${data.lastName} ${data.firstName}` : `${data.firstName} ${data.lastName}`,
-                    time: data.pickDate,
-                    language: data.language,
-                    doctorName: data.doctorName,
-                    confirmlink: buildUrlEmail(data.doctorId, token)
-                })
-                let user = await db.User.findOrCreate({
+
+                let user = await db.User.findOne({
                     where: {
                         email: data.email
-                    },
-                    defaults: {
-                        email: data.email,
-                        roleId: "R3",
-                        firstName: data.firstName,
-                        lastName: data.lastName,
-                        address: data.address,
-                        phoneNumber: data.phoneNumber,
-                    },
+                    }
                 });
-                console.log(data)
-
-                if (user && user[0]) {
-                    await db.Booking.findOrCreate({
-                        where: {
-                            patientId: user[0].id,
-                            doctorId: data.doctorId,
-                            date: data.date,
-                            timeType: data.timetype,
-                        },
-                        defaults: {
-                            statusId: 'S1',
-                            prognostic: data.reason,
-                            forWho: data.firstName + ' ' + data.lastName + '(' + data.forwho + ')',
-                            bookingDate: data.pickDate,
-                            patientAge: data.patientAge,
-                            gender: data.genderIdentity,
-                            token: token,
-                            phoneNumber: data.phoneNumber,
-                            address: data.address,
-                        }
-
+                if (user) {
+                    await db.Booking.create({
+                        patientId: user.id,
+                        doctorId: data.doctorId,
+                        date: data.date,
+                        timeType: data.timetype,
+                        statusId: 'S1',
+                        prognostic: data.reason,
+                        forWho: data.firstName + ' ' + data.lastName + '(' + data.forwho + ')',
+                        bookingDate: data.pickDate,
+                        patientAge: data.patientAge,
+                        gender: data.genderIdentity,
+                        token: token,
+                        phoneNumber: data.phoneNumber,
+                        address: data.address,
+                    })
+                    await sendEmailSimple.sendEmailSimple({
+                        receiverMail: data.email,
+                        patientName: data.language === 'vi' ? `${data.lastName} ${data.firstName}` : `${data.firstName} ${data.lastName}`,
+                        time: data.pickDate,
+                        language: data.language,
+                        doctorName: data.doctorName,
+                        confirmlink: buildUrlEmail(data.doctorId, token)
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'Save patient booking success',
+                        // data: data
+                    })
+                } else {
+                    resolve({
+                        errCode: 3,
+                        errMessage: 'User not found u must to login again',
+                        // data: data
                     })
                 }
-                resolve({
-                    errCode: 0,
-                    errMessage: 'Save patient booking success',
-                    // data: data
-                })
+
             }
         } catch (e) {
             console.log(e)
@@ -128,13 +121,16 @@ let getBookingInfoByProfile = (userId) => {
                     where: {
                         patientId: userId
                     },
+                    attributes: ['bookingDate', 'prognostic', 'id', 'patientAge', 'gender', 'address', 'phoneNumber', 'doctorId'],
                     include: [
                         {
                             model: db.User, as: 'doctorInfoData',
-                            attributes: ['email', 'firstName', 'lastName', 'gender', 'id'],
+                            attributes: ['firstName', 'lastName', 'id'],
                             include: [
                                 {
-                                    model: db.Doctor_Infor
+                                    model: db.Doctor_Infor,
+                                    attributes: ['addressClinic', 'nameClinic', 'nameSpecialty'],
+
                                 }
                             ],
                             plain: true,
@@ -156,8 +152,82 @@ let getBookingInfoByProfile = (userId) => {
         }
     })
 }
+let cancelBookingformPatient = (bookingId) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!bookingId) {
+                resolve({
+                    errCode: -1,
+                    errMessage: 'Missing parametter ...'
+                })
+            }
+            else {
+                let dataBooking = await db.Booking.findOne({
+                    where: {
+                        id: bookingId
+                    },
+                    include:
+                        [
+                            {
+                                model: db.User,
+                                as: 'patientData',
+                                attributes: ['email']
+                            },
+                            {
+                                model: db.User,
+                                as: 'doctorInfoData',
+                                attributes: ['lastName', 'firstName']
+                            }
+                        ]
+                })
+                if (dataBooking) {
+                    let difference = dataBooking.date - new Date().getTime();
+                    let daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
+
+                    if (daysDifference >= 1) {
+                        await db.Booking.update({
+                            statusId: 'S4'
+                        }, {
+                            where: {
+                                id: bookingId
+                            }
+                        })
+                        await sendEmailSimple.sendEmailCancelSchedule({
+                            receiverMail: dataBooking.patientData.email,
+                            patientName: dataBooking.forWho,
+                            time: dataBooking.bookingDate,
+                            doctorName: `${dataBooking?.doctorInfoData?.lastName} ${dataBooking?.doctorInfoData?.firstName}`,
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'delete success',
+                            dataBooking
+                        })
+                    } else {
+                        resolve({
+                            errCode: 1,
+                            errMessage: 'schedule not cancel, plz check again',
+                            dataBooking
+                        })
+                    }
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'schedule not found, plz check again',
+                    })
+                }
+
+            }
+        } catch (e) {
+            console.log(e)
+            reject(e)
+
+        }
+    })
+}
 module.exports = {
     postBookingAppointment: postBookingAppointment,
     postVerifyBooking: postVerifyBooking,
-    getBookingInfoByProfile: getBookingInfoByProfile
+    getBookingInfoByProfile: getBookingInfoByProfile,
+    cancelBookingformPatient: cancelBookingformPatient
 }

@@ -99,6 +99,8 @@ let getbodyHTMLCancelPatient = (data) => {
 
     return result
 }
+
+
 module.exports = {
     sendEmailSimple: sendEmailSimple,
     getBodyHTML: getBodyHTML,

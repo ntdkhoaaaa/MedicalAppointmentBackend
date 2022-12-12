@@ -126,15 +126,19 @@ let getBookingInfoByProfile = (userId) => {
             else {
                 let dataBooking = await db.Booking.findAll({
                     where: {
+
                         patientId: userId
                     },
+                    attributes: ['statusId', 'forWho', 'bookingDate', 'prognostic', 'id', 'patientAge', 'gender', 'address', 'phoneNumber', 'doctorId'],
                     include: [
                         {
                             model: db.User, as: 'doctorInfoData',
-                            attributes: ['email', 'firstName', 'lastName', 'gender', 'id'],
+                            attributes: ['firstName', 'lastName', 'id'],
                             include: [
                                 {
-                                    model: db.Doctor_Infor
+                                    model: db.Doctor_Infor,
+                                    attributes: ['addressClinic', 'nameClinic', 'nameSpecialty'],
+
                                 }
                             ],
                             plain: true,

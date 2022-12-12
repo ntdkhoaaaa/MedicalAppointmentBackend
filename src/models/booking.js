@@ -14,6 +14,8 @@ module.exports = (sequelize, DataTypes) => {
             Booking.belongsTo(models.Allcode, { foreignKey: 'timeType', targetKey: 'keyMap', as: 'timeTypeDataPatient' })
             // define association here
             Booking.belongsTo(models.User, { foreignKey: 'doctorId', targetKey: 'id', as: 'doctorInfoData' })
+            Booking.hasOne(models.History, { foreignKey: 'bookingId' })
+
 
         }
     };

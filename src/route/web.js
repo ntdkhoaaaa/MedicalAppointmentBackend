@@ -74,6 +74,11 @@ let initWebRoute = (app) => {
     router.get("/api/check-permission", authJwt.checkPermissionByToken);
     router.post('/api/refresh-token', userController.handleRefreshToken);
 
+
+    //history
+    router.post('/api/post-history-patient', doctorController.postHistoryPatient);
+    router.get('/api/get-history-patient', doctorController.getHistoryPatient);
+
     return app.use("/", router)
 }
 module.exports = initWebRoute;

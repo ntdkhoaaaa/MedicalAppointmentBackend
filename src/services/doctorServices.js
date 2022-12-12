@@ -525,6 +525,213 @@ let getListPatientForDoctor = (doctorId, date) => {
         }
     })
 }
+
+let postHistoryPatient = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data.bookingId || !data.medicalRecords) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters',
+                    data: data
+                })
+            }
+            else {
+                let bookinginfo = await db.Booking.findOne({
+                    where: {
+                        id: data.bookingId
+                    },
+                    include: [
+                        {
+                            model: db.User,
+                            as: 'patientData',
+                            attributes: ['email']
+                        },
+                        {
+                            model: db.User,
+                            as: 'doctorInfoData',
+                            attributes: ['email', 'firstName', 'lastName']
+                        }
+                    ]
+                })
+                if (bookinginfo) {
+                    await db.History.create({
+                        bookingId: data.bookingId,
+                        medicalRecords: data.medicalRecords,
+                        medicineRange: data.medicineRange,
+                    }).then(async function (x) {
+                        let dataReceipt = data.receipts.map(item => {
+                            item.historyId = x.id;
+                            return item;
+                        })
+                        await db.Receipt.bulkCreate(dataReceipt)
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'create history success',
+                            bookinginfo
+                        })
+                    })
+                    await db.Booking.update({
+                        statusId: 'S3'
+                    }, {
+                        where: {
+                            id: data.bookingId
+                        }
+                    })
+
+                }
+                else {
+                    resolve({
+                        errCode: 1,
+                        errMessage: 'booking notfound',
+                        bookinginfo
+                    })
+                }
+
+
+
+
+                // let schedule = data.arrSchedule;
+                // schedule = schedule.map(item => {
+                //     item.maxNumber = MAX_NUMBER_SCHEDULE;
+                //     return item;
+                // })
+
+                // let existing = await db.Schedule.findAll({
+                //     where: {
+                //         doctorId: data.doctorId,
+                //         date: data.date,
+                //     },
+                //     attributes: ['timetype', 'date', 'doctorId', 'maxNumber'],
+                //     raw: true
+                // });
+                // let toCreate = _.differenceWith(schedule, existing, (a, b) => {
+                //     return a.timetype === b.timetype && a.date.toString() === b.date;
+                // })
+                // // && c.doctorId === c.doctorId
+                // if (toCreate && toCreate.length > 0) {
+                //     await db.Schedule.bulkCreate(toCreate)
+                //     resolve({
+                //         errCode: 0,
+                //         errMessage: 'OKK'
+                //     })
+                // }
+                // else {
+                //     resolve({
+                //         errCode: 0,
+                //         errMessage: 'OKK but no more rows added cause it already exists'
+                //     })
+                // }
+
+            }
+        } catch (e) {
+            reject(e);
+        }
+    })
+}
+let getHistoryPatient = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters',
+                })
+            }
+            else {
+                // let bookinginfo = await db.Booking.findOne({
+                //     where: {
+                //         id: data
+                //     },
+                //     include: [
+                //         {
+                //             model: db.History,
+                //             include: [{
+                //                 model: db.Receipt,
+                //                 as: 'receiptData',
+                //             }]
+                //         },
+                //         {
+                //             model: db.User,
+                //             as: 'doctorInfoData',
+                //             attributes: ['email', 'firstName', 'lastName', 'image'],
+                //             include: [{
+                //                 model: db.Doctor_Infor,
+                //                 attributes: {
+                //                     exclude: ['id', 'doctorId']
+                //                 },
+                //             }]
+                //         }
+                //     ]
+                // })
+                // if (bookinginfo) {
+                //     resolve({
+                //         errCode: 0,
+                //         historyInfo: bookinginfo
+
+                //     })
+                // }
+                // else {
+                //     resolve({
+                //         errCode: 1,
+                //         errMessage: 'booking notfound',
+
+                //     })
+                // }
+                let historyInfo = await db.History.findOne({
+                    where: {
+                        bookingId: data
+                    },
+                    include: [
+                        {
+                            model: db.Receipt,
+                            as: 'receiptData',
+                            attributes: {
+                                exclude: ['id', 'historyId']
+                            },
+                        },
+                        {
+                            model: db.Booking,
+                            attributes: ['doctorId'],
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: 'doctorInfoData',
+                                    attributes: ['email', 'firstName', 'lastName', 'image', 'id'],
+                                    include: [{
+                                        model: db.Doctor_Infor,
+                                        attributes: {
+                                            exclude: ['id', 'doctorId']
+                                        },
+                                    }]
+                                }
+                            ]
+                        },
+                    ]
+                })
+                if (historyInfo) {
+                    resolve({
+                        errCode: 0,
+                        historyInfo: historyInfo
+
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 1,
+                        errMessage: 'booking notfound',
+
+                    })
+                }
+
+            }
+        } catch (e) {
+            reject(e);
+        }
+    })
+}
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctors: getAllDoctors,
@@ -537,5 +744,7 @@ module.exports = {
     deleteSelectedSchedule: deleteSelectedSchedule,
     getExtraInforDoctorById: getExtraInforDoctorById,
     getProfileDoctorById: getProfileDoctorById,
-    getListPatientForDoctor: getListPatientForDoctor
+    getListPatientForDoctor: getListPatientForDoctor,
+    postHistoryPatient: postHistoryPatient,
+    getHistoryPatient: getHistoryPatient
 }

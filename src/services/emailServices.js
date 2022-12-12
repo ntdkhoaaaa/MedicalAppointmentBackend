@@ -159,11 +159,52 @@ let getbodyHTMLHistoryToPatient = (data) => {
 
     return result
 }
+
+let sendEmailVerifyRegister = async (data) => {
+    let transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_APP, // generated ethereal user
+            pass: process.env.EMAIL_APP_PASSWORD, // generated ethereal password
+        },
+    });
+
+    // send mail with defined transport object
+    let info = await transporter.sendMail({
+        // receiverMail: data.email,
+        // patientName: data.fullName,
+        // time: data.bookingDate,
+        // language: data.language
+        from: '"KMP MEDICAL APPOINTMENT SYSTEM 👻" <ntdkhoaforwork@gmail.com>', // sender address
+        to: data.receiverMail, // list of receivers
+        subject: `XÁC NHẬN THÔNG TIN ĐĂNG KÝ TÀI KHOẢN HỆ THỐNG ĐẶT LỊCH KHÁM BỆNH KMP`, // Subject line
+        html: getBodyHTMLVerifyRegister(data), // html body
+    });
+}
+let getBodyHTMLVerifyRegister = (data) => {
+    let result = '';
+    result =
+        `
+        <h3>${data.patientName} thân mến ✔ </h3>
+        <p> Đây là email tự động được gửi từ hệ thống đặt lịch khám bệnh KMP nhằm xác nhận đăng ký tài khoản 
+        trên nền tảng của chúng tôi</p>
+        <p>Vui lòng nhấn vào nút bên dưới để xác nhận tài khoản của bạn trên hệ thống</p>
+        <div>
+            <a href=${data.confirmlink} target="_blank">Click here</a>
+        </div>
+        <p>Trân trọng</p>`
+
+    return result
+}
 module.exports = {
     sendEmailSimple: sendEmailSimple,
     getBodyHTML: getBodyHTML,
     sendEmailCancelSchedule: sendEmailCancelSchedule,
     getbodyHTMLCancelPatient: getbodyHTMLCancelPatient,
     getbodyHTMLHistoryToPatient: getbodyHTMLHistoryToPatient,
-    sendEmailHistoryToPatient: sendEmailHistoryToPatient
+    sendEmailHistoryToPatient: sendEmailHistoryToPatient,
+    getBodyHTMLVerifyRegister: getBodyHTMLVerifyRegister,
+    sendEmailVerifyRegister: sendEmailVerifyRegister
 }

@@ -2,8 +2,13 @@ import db from "../models/index";
 import bcrypt from "bcryptjs"
 const salt = bcrypt.genSaltSync(10);
 const jwt = require("jsonwebtoken");
-const cookieParser = require("cookie-parser");
+import sendEmailSimple from './emailServices'
 
+const cookieParser = require("cookie-parser");
+let buildUrlEmail = (token) => {
+    let result = `${process.env.URL_REACT}/verify-register?token=${token}`
+    return result
+}
 let handleUserLogin = (email, password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -12,7 +17,7 @@ let handleUserLogin = (email, password) => {
             if (isExist) {
                 let user = await db.User.findOne({
                     attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName', 'phoneNumber', 'address', 'gender'],
-                    where: { email: email },
+                    where: { email: email, statusId: 'S2' },
                     raw: true
                 });
                 if (user) {
@@ -292,6 +297,14 @@ let handleRegister = (data) => {
                     firstName: data.firstName,
                     lastName: data.lastName,
                     roleId: 'R3',
+                    statusId: 'S1'
+                }).then(async function (x) {
+                    let token = jwt.sign({ id: x.id }, process.env.JSON_SECRET_REGISTER);
+                    await sendEmailSimple.sendEmailVerifyRegister({
+                        receiverMail: data.email,
+                        patientName: `${data.lastName} ${data.firstName}`,
+                        confirmlink: buildUrlEmail(token)
+                    })
                 })
                 resolve({
                     errCode: 0,
@@ -361,6 +374,51 @@ let handleRefreshToken = (data) => {
     })
 }
 
+let postVerifyRegister = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let id = '';
+            //check email exist
+            if (!data.token) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "Missing parametter"
+                })
+            }
+            else {
+                jwt.verify(data.token, process.env.JSON_SECRET_REGISTER, async (err, decoded) => {
+                    if (err) {
+                        resolve({
+                            errCode: 2,
+                            errMessage: "token invalid"
+                        })
+                    }
+                    id = decoded.id;
+                });
+                if (id) {
+                    await db.User.update({
+                        statusId: 'S2'
+                    }, {
+                        where: { id: id }
+                    }
+                    )
+                    resolve({
+                        errCode: 0,
+                        errMessage: "success"
+                    })
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: "token invalid"
+                    })
+                }
+            }
+        } catch (error) {
+            console.log(error)
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleUserLogin: handleUserLogin,
     checkUserEmail: checkUserEmail,
@@ -372,5 +430,6 @@ module.exports = {
     getAllCodeService: getAllCodeService,
     handleRegister: handleRegister,
     updateUserInforInProfile: updateUserInforInProfile,
-    handleRefreshToken: handleRefreshToken
+    handleRefreshToken: handleRefreshToken,
+    postVerifyRegister: postVerifyRegister
 }

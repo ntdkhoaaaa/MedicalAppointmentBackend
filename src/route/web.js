@@ -25,7 +25,9 @@ let initWebRoute = (app) => {
 
     router.post('/api/create-new-user', userController.handleCreateNewUser);
     router.post('/api/login', userController.handleLogin)
+    //register
     router.post("/api/register", userController.handleRegister);
+    router.post('/api/verify-register', userController.postVerifyRegister);
 
     router.delete('/api/delete-user', userController.handleDeleteUser);
 
@@ -78,6 +80,11 @@ let initWebRoute = (app) => {
     //history
     router.post('/api/post-history-patient', doctorController.postHistoryPatient);
     router.get('/api/get-history-patient', doctorController.getHistoryPatient);
+
+    //rating
+    router.post('/api/post-rating-patient', patientController.postRatingPatient);
+    router.get('/api/get-rating-patient', doctorController.getRatingDoctor);
+
 
     return app.use("/", router)
 }

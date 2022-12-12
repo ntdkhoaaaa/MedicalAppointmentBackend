@@ -113,6 +113,19 @@ let handleRefreshToken = async (req, res) => {
         })
     }
 }
+let postVerifyRegister = async (req, res) => {
+    try {
+        console.log(req.body.token)
+        let infor = await userService.postVerifyRegister(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        console.log(e)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     handleLogin: handleLogin,
     handleGetAllUser: handleGetAllUser,
@@ -122,5 +135,6 @@ module.exports = {
     getAllCode: getAllCode,
     handleRegister: handleRegister,
     handleRefreshToken: handleRefreshToken,
-    updateUserInforInProfile: updateUserInforInProfile
+    updateUserInforInProfile: updateUserInforInProfile,
+    postVerifyRegister: postVerifyRegister
 }

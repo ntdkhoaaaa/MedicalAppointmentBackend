@@ -1,5 +1,7 @@
 import db from "../models/index";
 require('dotenv').config();
+import sendEmailSimple from './emailServices'
+
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE
 import _ from 'lodash';
 
@@ -525,7 +527,6 @@ let getListPatientForDoctor = (doctorId, date) => {
         }
     })
 }
-
 let postHistoryPatient = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -551,7 +552,7 @@ let postHistoryPatient = (data) => {
                         {
                             model: db.User,
                             as: 'doctorInfoData',
-                            attributes: ['email', 'firstName', 'lastName']
+                            attributes: ['email', 'lastName', 'firstName']
                         }
                     ]
                 })
@@ -580,50 +581,22 @@ let postHistoryPatient = (data) => {
                         }
                     })
 
+                    await sendEmailSimple.sendEmailHistoryToPatient({
+                        receiverMail: bookinginfo.patientData.email,
+                        patientName: bookinginfo.forWho,
+                        time: bookinginfo.bookingDate,
+                        doctorName: `${bookinginfo.doctorInfoData.lastName} ${bookinginfo.doctorInfoData.firstName}`,
+                        receipts: data.receipts,
+                        medicalRecords: data.medicalRecords,
+                        medicineRange: data.medicineRange,
+                    })
                 }
                 else {
                     resolve({
                         errCode: 1,
                         errMessage: 'booking notfound',
-                        bookinginfo
                     })
                 }
-
-
-
-
-                // let schedule = data.arrSchedule;
-                // schedule = schedule.map(item => {
-                //     item.maxNumber = MAX_NUMBER_SCHEDULE;
-                //     return item;
-                // })
-
-                // let existing = await db.Schedule.findAll({
-                //     where: {
-                //         doctorId: data.doctorId,
-                //         date: data.date,
-                //     },
-                //     attributes: ['timetype', 'date', 'doctorId', 'maxNumber'],
-                //     raw: true
-                // });
-                // let toCreate = _.differenceWith(schedule, existing, (a, b) => {
-                //     return a.timetype === b.timetype && a.date.toString() === b.date;
-                // })
-                // // && c.doctorId === c.doctorId
-                // if (toCreate && toCreate.length > 0) {
-                //     await db.Schedule.bulkCreate(toCreate)
-                //     resolve({
-                //         errCode: 0,
-                //         errMessage: 'OKK'
-                //     })
-                // }
-                // else {
-                //     resolve({
-                //         errCode: 0,
-                //         errMessage: 'OKK but no more rows added cause it already exists'
-                //     })
-                // }
-
             }
         } catch (e) {
             reject(e);
@@ -715,13 +688,62 @@ let getHistoryPatient = (data) => {
                     resolve({
                         errCode: 0,
                         historyInfo: historyInfo
-
                     })
                 }
                 else {
                     resolve({
                         errCode: 1,
                         errMessage: 'booking notfound',
+
+                    })
+                }
+
+            }
+        } catch (e) {
+            reject(e);
+        }
+    })
+}
+
+let getRatingDoctor = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters',
+                })
+            }
+            else {
+                let ratingInfo = await db.Rating.findAll({
+                    where: {
+                        doctorId: data
+                    },
+                    include: [
+                        {
+                            model: db.Booking,
+                            attributes: ['patientId'],
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: 'patientData',
+                                    attributes: ['email', 'firstName', 'lastName', 'image', 'id', 'gender'],
+                                }
+                            ]
+                        }
+                    ]
+                })
+                if (ratingInfo) {
+                    resolve({
+                        errCode: 0,
+                        ratingInfo: ratingInfo
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 1,
+                        ratingInfo: ratingInfo,
 
                     })
                 }
@@ -746,5 +768,6 @@ module.exports = {
     getProfileDoctorById: getProfileDoctorById,
     getListPatientForDoctor: getListPatientForDoctor,
     postHistoryPatient: postHistoryPatient,
-    getHistoryPatient: getHistoryPatient
+    getHistoryPatient: getHistoryPatient,
+    getRatingDoctor: getRatingDoctor
 }

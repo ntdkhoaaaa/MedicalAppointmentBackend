@@ -225,9 +225,59 @@ let cancelBookingformPatient = (bookingId) => {
         }
     })
 }
+let postRatingPatient = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.patientId || !data.doctorId || !data.bookingId || !data.rate) {
+                resolve({
+                    errCode: -1,
+                    errMessage: 'Missing parametter ...'
+                })
+            }
+            else {
+                let dataBooking = await db.Booking.findOne({
+                    where: {
+                        id: data.bookingId
+                    }
+                })
+                if (dataBooking) {
+                    await db.Rating.create({
+                        patientId: data.patientId,
+                        doctorId: data.doctorId,
+                        rate: data.rate,
+                        comment: data.comment
+                    })
+                    await db.Booking.update({
+                        statusId: 'S5'
+                    }, {
+                        where: {
+                            id: data.bookingId
+                        }
+                    })
+                    resolve({
+                        errCode: 0,
+                        errMessage: ' create rating success',
+                    })
+
+                } else {
+                    resolve({
+                        errCode: 2,
+                        errMessage: 'booking not found, plz check again',
+                    })
+                }
+
+            }
+        } catch (e) {
+            console.log(e)
+            reject(e)
+
+        }
+    })
+}
 module.exports = {
     postBookingAppointment: postBookingAppointment,
     postVerifyBooking: postVerifyBooking,
     getBookingInfoByProfile: getBookingInfoByProfile,
-    cancelBookingformPatient: cancelBookingformPatient
+    cancelBookingformPatient: cancelBookingformPatient,
+    postRatingPatient: postRatingPatient
 }

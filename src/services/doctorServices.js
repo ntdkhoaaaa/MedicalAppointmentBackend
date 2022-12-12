@@ -715,13 +715,62 @@ let getHistoryPatient = (data) => {
                     resolve({
                         errCode: 0,
                         historyInfo: historyInfo
-
                     })
                 }
                 else {
                     resolve({
                         errCode: 1,
                         errMessage: 'booking notfound',
+
+                    })
+                }
+
+            }
+        } catch (e) {
+            reject(e);
+        }
+    })
+}
+
+let getRatingDoctor = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+
+            if (!data) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters',
+                })
+            }
+            else {
+                let ratingInfo = await db.Rating.findAll({
+                    where: {
+                        doctorId: data
+                    },
+                    include: [
+                        {
+                            model: db.Booking,
+                            attributes: ['patientId'],
+                            include: [
+                                {
+                                    model: db.User,
+                                    as: 'patientData',
+                                    attributes: ['email', 'firstName', 'lastName', 'image', 'id', 'gender'],
+                                }
+                            ]
+                        }
+                    ]
+                })
+                if (ratingInfo) {
+                    resolve({
+                        errCode: 0,
+                        ratingInfo: ratingInfo
+                    })
+                }
+                else {
+                    resolve({
+                        errCode: 1,
+                        ratingInfo: ratingInfo,
 
                     })
                 }
@@ -746,5 +795,6 @@ module.exports = {
     getProfileDoctorById: getProfileDoctorById,
     getListPatientForDoctor: getListPatientForDoctor,
     postHistoryPatient: postHistoryPatient,
-    getHistoryPatient: getHistoryPatient
+    getHistoryPatient: getHistoryPatient,
+    getRatingDoctor: getRatingDoctor
 }

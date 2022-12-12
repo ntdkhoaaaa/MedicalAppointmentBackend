@@ -17,6 +17,12 @@ module.exports = {
       rate: {
         type: Sequelize.INTEGER
       },
+      patientId: {
+        type: Sequelize.INTEGER
+      },
+      doctorId: {
+        type: Sequelize.INTEGER
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

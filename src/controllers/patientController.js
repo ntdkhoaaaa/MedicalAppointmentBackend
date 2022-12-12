@@ -33,8 +33,20 @@ let getBookingInfoByProfile = async (req, res) => {
         })
     }
 }
+let cancelBookingformPatient = async (req, res) => {
+    try {
+        let infor = await patientServices.cancelBookingformPatient(req.body.id);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     postBookingAppointment: postBookingAppointment,
     postVerifyBooking: postVerifyBooking,
-    getBookingInfoByProfile: getBookingInfoByProfile
+    getBookingInfoByProfile: getBookingInfoByProfile,
+    cancelBookingformPatient: cancelBookingformPatient
 }

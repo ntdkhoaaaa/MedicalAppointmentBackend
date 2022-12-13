@@ -88,14 +88,16 @@ let postVerifyBooking = (data) => {
                 if (appointment) {
                     appointment.statusId = 'S2';
                     await appointment.save();
+                    console.log('appointment ', appointment.dataValues.timeType)
                     let scheduleInfo = await db.Schedule.findOne({
                         where: {
                             doctorId: data.doctorId,
-                            date: appointment.date,
-                            timeType: appointment.timetype,
+                            date: appointment.dataValues.date,
+                            timeType: appointment.dataValues.timeType,
                         },
                         raw: false,
                     })
+                    console.log('schedule', scheduleInfo)
                     if (scheduleInfo) {
                         scheduleInfo.maxNumber = scheduleInfo.maxNumber - 1;
                         await scheduleInfo.save();

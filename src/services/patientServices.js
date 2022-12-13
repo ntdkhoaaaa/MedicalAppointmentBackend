@@ -88,6 +88,18 @@ let postVerifyBooking = (data) => {
                 if (appointment) {
                     appointment.statusId = 'S2';
                     await appointment.save();
+                    let scheduleInfo = await db.Schedule.findOne({
+                        where: {
+                            doctorId: data.doctorId,
+                            date: appointment.date,
+                            timeType: appointment.timetype,
+                        },
+                        raw: false,
+                    })
+                    if (scheduleInfo) {
+                        scheduleInfo.maxNumber = scheduleInfo.maxNumber - 1;
+                        await scheduleInfo.save();
+                    }
                     resolve({
                         errCode: 0,
                         errMessage: 'Save patient booking success',

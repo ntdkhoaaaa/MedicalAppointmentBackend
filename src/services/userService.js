@@ -140,7 +140,8 @@ let createNewUser = (data) => {
                     gender: data.gender,
                     roleId: data.roleId,
                     positionId: data.positionId,
-                    image: data.avatar
+                    image: data.avatar,
+                    statusId: 'S2'
                 })
                 resolve({
                     errCode: 0,

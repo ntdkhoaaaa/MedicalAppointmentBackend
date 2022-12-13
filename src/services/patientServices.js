@@ -246,7 +246,8 @@ let postRatingPatient = (data) => {
                         patientId: data.patientId,
                         doctorId: data.doctorId,
                         rate: data.rate,
-                        comment: data.comment
+                        comment: data.comment,
+                        bookingId: data.bookingId
                     })
                     await db.Booking.update({
                         statusId: 'S5'

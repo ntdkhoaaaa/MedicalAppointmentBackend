@@ -126,6 +126,40 @@ let postVerifyRegister = async (req, res) => {
         })
     }
 }
+let handleForgotPassword = async (req, res) => {
+    try {
+        let userData = await userService.handleForgotPassword(req.body);
+        return res.status(200).json(userData);
+    } catch (error) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'err from server'
+        })
+    }
+}
+let handleInfoResetPasswordByToken = async (req, res) => {
+    try {
+        let userData = await userService.handleInfoResetPasswordByToken(req.body);
+        return res.status(200).json(userData);
+    } catch (error) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'err from server'
+        })
+    }
+
+}
+let handleResetPassword = async (req, res) => {
+    try {
+        let userData = await userService.handleResetPassword(req.body);
+        return res.status(200).json(userData);
+    } catch (error) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'err from server'
+        })
+    }
+}
 module.exports = {
     handleLogin: handleLogin,
     handleGetAllUser: handleGetAllUser,
@@ -136,5 +170,9 @@ module.exports = {
     handleRegister: handleRegister,
     handleRefreshToken: handleRefreshToken,
     updateUserInforInProfile: updateUserInforInProfile,
-    postVerifyRegister: postVerifyRegister
+    postVerifyRegister: postVerifyRegister,
+    handleForgotPassword: handleForgotPassword,
+    handleInfoResetPasswordByToken: handleInfoResetPasswordByToken,
+    handleResetPassword: handleResetPassword,
+
 }

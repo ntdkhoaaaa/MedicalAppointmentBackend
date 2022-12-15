@@ -198,6 +198,39 @@ let getBodyHTMLVerifyRegister = (data) => {
 
     return result
 }
+let sendEmailChangePassword = async (data) => {
+    let transporter = nodemailer.createTransport({
+        host: "smtp.gmail.com",
+        port: 587,
+        secure: false, // true for 465, false for other ports
+        auth: {
+            user: process.env.EMAIL_APP, // generated ethereal user
+            pass: process.env.EMAIL_APP_PASSWORD, // generated ethereal password
+        },
+    });
+    let info = await transporter.sendMail({
+        from: '"KMP MEDICAL APPOINTMENT SYSTEM 👻" <phucdpb@gmail.com>', // sender address
+        to: data.receiverMail, // list of receivers
+        subject: `[KPM MEDICAL] Xin hãy reset lại password`,
+        html: getBodyHTMLChangPassword(data), // html body
+    });
+}
+let getBodyHTMLChangPassword = (data) => {
+    let result = '';
+    result =
+        `
+        <h3>${data.receiverMail} thân mến ✔ </h3>
+        <p> Đây là email tự động được gửi từ hệ thống đặt lịch khám bệnh KMP nhằm để giúp bạn reset lại password
+        trên nền tảng của chúng tôi</p>
+        <p>Mời bạn click vào đường link bên dưới để truy cập vào trang reset password</p>
+        <div>
+            <a href=${data.confirmlink} target="_blank">Click here</a>
+
+        </div>
+        <p>Trân trọng</p>`
+
+    return result
+}
 module.exports = {
     sendEmailSimple: sendEmailSimple,
     getBodyHTML: getBodyHTML,
@@ -206,5 +239,8 @@ module.exports = {
     getbodyHTMLHistoryToPatient: getbodyHTMLHistoryToPatient,
     sendEmailHistoryToPatient: sendEmailHistoryToPatient,
     getBodyHTMLVerifyRegister: getBodyHTMLVerifyRegister,
-    sendEmailVerifyRegister: sendEmailVerifyRegister
+    sendEmailVerifyRegister: sendEmailVerifyRegister,
+    sendEmailChangePassword: sendEmailChangePassword,
+    getBodyHTMLChangPassword: getBodyHTMLChangPassword,
+
 }

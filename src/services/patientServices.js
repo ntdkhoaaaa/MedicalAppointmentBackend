@@ -133,9 +133,11 @@ let getBookingInfoByProfile = (userId) => {
             else {
                 let dataBooking = await db.Booking.findAll({
                     where: {
+
                         patientId: userId
                     },
-                    attributes: ['bookingDate', 'prognostic', 'id', 'patientAge', 'gender', 'address', 'phoneNumber', 'doctorId'],
+                    attributes: ['statusId', 'forWho', 'bookingDate', 'prognostic', 'id', 'patientAge', 'gender', 'address', 'phoneNumber', 'doctorId'],
+
                     include: [
                         {
                             model: db.User, as: 'doctorInfoData',
@@ -220,7 +222,7 @@ let cancelBookingformPatient = (bookingId) => {
                     } else {
                         resolve({
                             errCode: 1,
-                            errMessage: 'schedule not cancel, plz check again',
+                            errMessage: 'This schedule is uncancelable because the appointment is coming in 24 hours',
                             dataBooking
                         })
                     }
@@ -235,7 +237,6 @@ let cancelBookingformPatient = (bookingId) => {
         } catch (e) {
             console.log(e)
             reject(e)
-
         }
     })
 }
@@ -259,7 +260,8 @@ let postRatingPatient = (data) => {
                         patientId: data.patientId,
                         doctorId: data.doctorId,
                         rate: data.rate,
-                        comment: data.comment
+                        comment: data.comment,
+                        bookingId: data.bookingId
                     })
                     await db.Booking.update({
                         statusId: 'S5'

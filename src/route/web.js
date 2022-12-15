@@ -86,6 +86,10 @@ let initWebRoute = (app) => {
     router.get('/api/get-rating-patient', doctorController.getRatingDoctor);
 
 
+    //api get schedule from doctor
+    router.get('/api/get-schedule-by-date-from-doctor', doctorController.getScheduleByDateFromDoctor);
+
+
     return app.use("/", router)
 }
 module.exports = initWebRoute;

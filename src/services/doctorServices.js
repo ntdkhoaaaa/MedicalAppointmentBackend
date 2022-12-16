@@ -789,58 +789,98 @@ let getScheduleByDateFromDoctor = (doctorId, date) => {
                 })
             }
             else {
-                let dataSchedulenobooking = await db.Schedule.findAll({
+                let doctorInfo = await db.Doctor_Infor.findOne({
                     where: {
-                        doctorId: doctorId,
-                        date: date,
-                        maxNumber: {
-                            [Op.gt]: 0
-                        }
-                    },
-                    include: [
-                        {
-                            model: db.Allcode,
-                            as: 'timetypeData',
-                            attributes: ['valueEn', 'valueVi']
-                        },
-                        {
-                            model: db.User,
-                            as: 'doctorData',
-                            attributes: ['firstName', 'lastName']
-                        }
-                    ],
-                })
-                if (!dataSchedulenobooking) dataSchedulenobooking = [];
-
-                let dataSchedulebooked = await db.Schedule.findAll({
-                    where: {
-                        doctorId: doctorId,
-                        date: date,
-                        maxNumber: {
-                            [Op.lte]: 0
-                        }
-                    },
-                    include: [
-                        {
-                            model: db.Allcode,
-                            as: 'timetypeData',
-                            attributes: ['valueEn', 'valueVi']
-                        },
-                        {
-                            model: db.User,
-                            as: 'doctorData',
-                            attributes: ['firstName', 'lastName']
-                        }
-                    ],
-                })
-                if (!dataSchedulebooked) dataSchedulebooked = [];
-                resolve({
-                    errCode: 0,
-                    data: {
-                        nobooking: dataSchedulenobooking,
-                        booked: dataSchedulebooked
+                        doctorId: doctorId
                     }
                 })
+                if (doctorInfo) {
+                    let dataSchedulenobooking = await db.Schedule.findAll({
+                        where: {
+                            doctorId: doctorId,
+                            date: date,
+                            maxNumber: {
+                                [Op.eq]: doctorInfo.count
+                            }
+                        },
+                        include: [
+                            {
+                                model: db.Allcode,
+                                as: 'timetypeData',
+                                attributes: ['valueEn', 'valueVi']
+                            },
+                            {
+                                model: db.User,
+                                as: 'doctorData',
+                                attributes: ['firstName', 'lastName']
+                            }
+                        ],
+                    })
+                    if (!dataSchedulenobooking) dataSchedulenobooking = [];
+
+                    let dataSchedulebooked = await db.Schedule.findAll({
+                        where: {
+                            doctorId: doctorId,
+                            date: date,
+                            maxNumber: {
+                                [Op.and]: {
+                                    [Op.lt]: doctorInfo.count,
+                                    [Op.gt]: 0
+                                }
+                            }
+                        },
+                        include: [
+                            {
+                                model: db.Allcode,
+                                as: 'timetypeData',
+                                attributes: ['valueEn', 'valueVi']
+                            },
+                            {
+                                model: db.User,
+                                as: 'doctorData',
+                                attributes: ['firstName', 'lastName']
+                            }
+                        ],
+                    })
+                    if (!dataSchedulebooked) dataSchedulebooked = [];
+
+                    let dataSchedulefull = await db.Schedule.findAll({
+                        where: {
+                            doctorId: doctorId,
+                            date: date,
+                            maxNumber: {
+                                [Op.lte]: 0
+                            }
+                        },
+                        include: [
+                            {
+                                model: db.Allcode,
+                                as: 'timetypeData',
+                                attributes: ['valueEn', 'valueVi']
+                            },
+                            {
+                                model: db.User,
+                                as: 'doctorData',
+                                attributes: ['firstName', 'lastName']
+                            }
+                        ],
+                    })
+                    if (!dataSchedulefull) dataSchedulefull = [];
+                    resolve({
+                        errCode: 0,
+                        data: {
+                            nobooking: dataSchedulenobooking,
+                            booked: dataSchedulebooked,
+                            full: dataSchedulefull
+                        }
+                    })
+                } else {
+                    resolve({
+                        errCode: 1,
+                        errMessage: 'Doctor not found information'
+                    })
+                }
+
             }
         } catch (e) {
             console.log(e)

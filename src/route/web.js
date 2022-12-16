@@ -87,6 +87,15 @@ let initWebRoute = (app) => {
     router.get('/api/get-rating-patient', doctorController.getRatingDoctor);
 
 
+    //api get schedule from doctor
+    router.get('/api/get-schedule-by-date-from-doctor', doctorController.getScheduleByDateFromDoctor);
+
+    //forgot password
+    router.post('/api/forgot-password', userController.handleForgotPassword);
+    router.post('/api/get-info-reset-password-by-token', userController.handleInfoResetPasswordByToken);
+    router.post('/api/reset-password', userController.handleResetPassword);
+
+
     return app.use("/", router)
 }
 module.exports = initWebRoute;

@@ -9,6 +9,10 @@ let buildUrlEmail = (token) => {
     let result = `${process.env.URL_REACT}/verify-register?token=${token}`
     return result
 }
+let buildUrlForgotEmail = (token) => {
+    let result = `${process.env.URL_REACT}/reset-password?token=${token}`
+    return result
+}
 let handleUserLogin = (email, password) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -420,6 +424,133 @@ let postVerifyRegister = (data) => {
         }
     })
 }
+let handleForgotPassword = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            console.log('parram', data)
+            if (!data.email) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            }
+            else {
+                let user = await db.User.findOne({
+                    where: {
+                        email: data.email
+                    },
+                });
+                if (user) {
+                    let token = jwt.sign({ email: data.email }, process.env.JSON_SECRET_FORGOT_PASSWORD);
+                    await sendEmailSimple.sendEmailChangePassword({
+                        receiverMail: data.email,
+                        confirmlink: buildUrlForgotEmail(token)
+                    })
+
+                } else {
+                    resolve({
+                        errCode: 1,
+                        errMessage: 'Email không có trong hệ thống! vui lòng kiểm tra lại'
+                    })
+                }
+                resolve({
+                    errCode: 0,
+                    errMessage: 'OK',
+                    // data: data
+                })
+            }
+        } catch (e) {
+            console.log(e)
+            reject(e);
+        }
+    })
+}
+let handleInfoResetPasswordByToken = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let token = data.token;
+            if (!data.token) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            }
+            else {
+                jwt.verify(token, process.env.JSON_SECRET_FORGOT_PASSWORD, (err, decoded) => {
+                    if (err) {
+                        return res.status(200).json({
+                            errCode: 2,
+                            errMessage: 'Token not found'
+                        });
+                    }
+                    data.email = decoded.email;
+                })
+                let user = await db.User.findOne({
+                    attributes: ['email', 'firstName', 'lastName'],
+                    where: {
+                        email: data.email
+                    },
+                    raw: true,
+
+                });
+                if (user) {
+                    resolve({
+                        errCode: 0,
+                        errMessage: 'ok',
+                        data: user
+                    })
+                } else {
+                    resolve({
+                        errCode: 1,
+                        errMessage: 'Email không có trong hệ thống! vui lòng kiểm tra lại'
+                    })
+                }
+            }
+        } catch (e) {
+            console.log(e)
+            reject(e);
+        }
+    })
+}
+let handleResetPassword = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.password || !data.email) {
+                resolve({
+                    errCode: 2,
+                    errMessage: "Missing required parameter"
+                })
+            }
+            let user = db.User.findOne({
+                where: { email: data.email },
+                raw: false
+            })
+            if (user) {
+                let hashpassword = await hashUserPassword(data.password);
+                await db.User.update(
+                    {
+                        password: hashpassword
+                    },
+                    {
+                        where: { email: data.email },
+                    }
+                );
+                resolve({
+                    errCode: 0,
+                    message: "Update success"
+                });
+            }
+            else {
+                resolve({
+                    errCode: 1,
+                    message: 'User not found'
+                })
+            }
+        } catch (error) {
+            reject(error)
+        }
+    })
+}
 module.exports = {
     handleUserLogin: handleUserLogin,
     checkUserEmail: checkUserEmail,
@@ -432,5 +563,9 @@ module.exports = {
     handleRegister: handleRegister,
     updateUserInforInProfile: updateUserInforInProfile,
     handleRefreshToken: handleRefreshToken,
-    postVerifyRegister: postVerifyRegister
+    postVerifyRegister: postVerifyRegister,
+    handleForgotPassword: handleForgotPassword,
+    handleInfoResetPasswordByToken: handleInfoResetPasswordByToken,
+    handleResetPassword: handleResetPassword,
+
 }

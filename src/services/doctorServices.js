@@ -778,6 +778,76 @@ let getRatingDoctor = (data) => {
         }
     })
 }
+
+let getScheduleByDateFromDoctor = (doctorId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId && !date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter'
+                })
+            }
+            else {
+                let dataSchedulenobooking = await db.Schedule.findAll({
+                    where: {
+                        doctorId: doctorId,
+                        date: date,
+                        maxNumber: {
+                            [Op.gt]: 0
+                        }
+                    },
+                    include: [
+                        {
+                            model: db.Allcode,
+                            as: 'timetypeData',
+                            attributes: ['valueEn', 'valueVi']
+                        },
+                        {
+                            model: db.User,
+                            as: 'doctorData',
+                            attributes: ['firstName', 'lastName']
+                        }
+                    ],
+                })
+                if (!dataSchedulenobooking) dataSchedulenobooking = [];
+
+                let dataSchedulebooked = await db.Schedule.findAll({
+                    where: {
+                        doctorId: doctorId,
+                        date: date,
+                        maxNumber: {
+                            [Op.lte]: 0
+                        }
+                    },
+                    include: [
+                        {
+                            model: db.Allcode,
+                            as: 'timetypeData',
+                            attributes: ['valueEn', 'valueVi']
+                        },
+                        {
+                            model: db.User,
+                            as: 'doctorData',
+                            attributes: ['firstName', 'lastName']
+                        }
+                    ],
+                })
+                if (!dataSchedulebooked) dataSchedulebooked = [];
+                resolve({
+                    errCode: 0,
+                    data: {
+                        nobooking: dataSchedulenobooking,
+                        booked: dataSchedulebooked
+                    }
+                })
+            }
+        } catch (e) {
+            console.log(e)
+            reject(e)
+        }
+    })
+}
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctors: getAllDoctors,
@@ -794,5 +864,6 @@ module.exports = {
     postHistoryPatient: postHistoryPatient,
     getHistoryPatient: getHistoryPatient,
     getRatingDoctor: getRatingDoctor,
-    getListExaminatedPatientForDoctor: getListExaminatedPatientForDoctor
+    getListExaminatedPatientForDoctor: getListExaminatedPatientForDoctor,
+    getScheduleByDateFromDoctor: getScheduleByDateFromDoctor
 }

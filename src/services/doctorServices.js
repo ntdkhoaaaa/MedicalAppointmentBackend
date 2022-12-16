@@ -157,6 +157,7 @@ let saveDetailedInfor = (inputData) => {
                     doctorInfor.clinicId = inputData.selectedClinic;
                     doctorInfor.specialtyId = inputData.selectedSpecialty;
                     doctorInfor.note = inputData.note;
+                    doctorInfor.count = inputData.count;
                     doctorInfor.updateAt = new Date();
                     await doctorInfor.save();
                     resolve({
@@ -174,6 +175,7 @@ let saveDetailedInfor = (inputData) => {
                         nameClinic: inputData.nameClinic,
                         nameSpecialty: inputData.nameSpecialty,
                         note: inputData.note,
+                        count: inputData.count,
                         clinicId: inputData.selectedClinic,
                         specialtyId: inputData.selectedSpecialty,
                     })
@@ -506,6 +508,34 @@ let getListPatientForDoctor = (doctorId, date) => {
                 let dataBooking = await db.Booking.findAll({
                     where: {
                         statusId: 'S2',
+                        doctorId: doctorId,
+                        date: date
+                    }
+                })
+
+                resolve({
+                    errCode: 0,
+                    data: dataBooking
+                })
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
+let getListExaminatedPatientForDoctor = (doctorId, date) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!doctorId || !date) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameter'
+                })
+            }
+            else {
+                let dataBooking = await db.Booking.findAll({
+                    where: {
+                        statusId: 'S3',
                         doctorId: doctorId,
                         date: date
                     }
@@ -874,5 +904,6 @@ module.exports = {
     postHistoryPatient: postHistoryPatient,
     getHistoryPatient: getHistoryPatient,
     getRatingDoctor: getRatingDoctor,
+    getListExaminatedPatientForDoctor: getListExaminatedPatientForDoctor,
     getScheduleByDateFromDoctor: getScheduleByDateFromDoctor
 }

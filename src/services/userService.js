@@ -32,10 +32,10 @@ let handleUserLogin = (email, password) => {
                         userData.errMessage = 'Ok';
                         delete user.password;
                         let tokenAccess = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JSON_SECRET_ACCESS, {
-                            expiresIn: '30s'
+                            expiresIn: '30m'
                         });
                         let tokenRefresh = jwt.sign({ id: user.id, roleId: user.roleId }, process.env.JSON_SECRET_REFRESH, {
-                            expiresIn: '2m'
+                            expiresIn: '1h'
                         });
                         await db.Refresh_Token.create(
                             {
@@ -339,12 +339,12 @@ let handleRefreshToken = (data) => {
             });
             if (info) {
                 let tokenAccess = jwt.sign({ id: info.User.id, roleId: info.User.roleId }, process.env.JSON_SECRET_ACCESS, {
-                    expiresIn: '30s'
+                    expiresIn: '30m'
                 });
                 jwt.verify(info.refreshToken, process.env.JSON_SECRET_REFRESH, async (err, decoded) => {
                     if (err) {
                         let tokenRefresh = jwt.sign({ id: info.User.id, roleId: info.User.roleId }, process.env.JSON_SECRET_REFRESH, {
-                            expiresIn: '2m'
+                            expiresIn: '1h'
                         });
                         await db.Refresh_Token.update(
                             {

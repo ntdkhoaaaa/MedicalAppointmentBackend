@@ -744,6 +744,8 @@ let getRatingDoctor = (data) => {
                     where: {
                         doctorId: data
                     },
+                    raw: true,
+                    nest: true,
                     include: [
                         {
                             model: db.Booking,
@@ -759,9 +761,21 @@ let getRatingDoctor = (data) => {
                     ]
                 })
                 if (ratingInfo) {
+                    var result = await ratingInfo.map(function (el) {
+                        var o = Object.assign({}, el);
+                        let firstDate = new Date(el.updatedAt),
+                            secondDate = new Date(),
+                            timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
+                        let differentDays = Math.ceil(timeDifference / (1000 * 3600 * 24));
+                        let sothang = parseInt(differentDays / 30);
+                        let songay = differentDays;
+                        o.songay = songay;
+                        o.sothang = sothang;
+                        return o;
+                    })
                     resolve({
                         errCode: 0,
-                        ratingInfo: ratingInfo
+                        ratingInfo: result
                     })
                 }
                 else {

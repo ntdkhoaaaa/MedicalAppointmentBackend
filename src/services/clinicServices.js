@@ -19,7 +19,7 @@ let postNewClinic = (data) => {
                     nameEn: data.nameEn,
                     address: data.address,
                     addressEn: data.addressEn,
-                    // image: data.imageBase64,
+                    image: data.imageBase64,
                     descriptionHTML: data.descriptionHTML,
                     descriptionMarkdown: data.descriptionMarkdown
                 })

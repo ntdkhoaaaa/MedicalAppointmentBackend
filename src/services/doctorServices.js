@@ -758,6 +758,16 @@ let getRatingDoctor = (data) => {
                         }
                     ]
                 })
+                console.log('check image', ratingInfo[0].Booking.patientData.image)
+                if (ratingInfo) {
+                    ratingInfo.forEach(element => {
+                        if (element.Booking.patientData.image) {
+                            element.Booking.patientData.image = new Buffer(element.Booking.patientData.image, 'base64').toString('binary');
+
+                        }
+                    })
+                    // ratingInfo.Booking.patientData.image = new Buffer(users.image, 'base64').toString('binary');
+                }
                 if (ratingInfo) {
                     resolve({
                         errCode: 0,

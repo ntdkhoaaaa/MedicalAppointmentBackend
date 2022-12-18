@@ -63,7 +63,6 @@ let initWebRoute = (app) => {
 
 
     router.get('/api/get-all-appointment-of-user', patientController.getBookingInfoByProfile)
-    router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor);
     router.get('/api/get-list-examinated-patient-for-doctor', doctorController.getListExaminatedPatientForDoctor);
 
     router.post('/api/cancel-booking', patientController.cancelBookingformPatient)

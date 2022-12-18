@@ -317,6 +317,7 @@ let handleRegister = (data) => {
                 })
             }
         } catch (error) {
+            console.log(error)
             reject(error)
         }
     })

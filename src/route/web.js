@@ -52,15 +52,19 @@ let initWebRoute = (app) => {
 
     router.post('/api/patient-booking-appointment', patientController.postBookingAppointment)
     router.post('/api/verify-booking', patientController.postVerifyBooking);
-
+    //specialty
     router.post('/api/add-new-specialty', specialtyController.postNewSpecialty);
     router.get('/api/get-all-specialties', specialtyController.getAllSpecialities)
     router.get('/api/get-detail-specialty-byId', specialtyController.getDetailSpecialtyById)
+    router.get('/api/delete-specialty-by-id', specialtyController.deleteSpecialtyById)
+    router.post('/api/update-specialty-by-id', specialtyController.updateSpecialtyData);
 
+    //clinic
     router.post('/api/add-new-clinic', clinicController.postNewClinic);
     router.get('/api/get-all-clinics', clinicController.getAllClinics);
     router.get('/api/get-detail-clinic-byId', clinicController.getDetailClinicById)
     router.get('/api/delete-clinic-by-id', clinicController.deleteClinicById)
+    router.post('/api/update-clinic-by-id', clinicController.updateClinicbyId);
 
     router.get('/api/get-all-appointment-of-user', patientController.getBookingInfoByProfile)
     router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor);

@@ -32,8 +32,20 @@ let getDetailClinicById = async (req, res) => {
         })
     }
 }
+let deleteClinicById = async (req, res) => {
+    try {
+        let infor = await clinicServices.deleteClinicById(req.query.id);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     postNewClinic: postNewClinic,
     getAllClinics: getAllClinics,
-    getDetailClinicById: getDetailClinicById
+    getDetailClinicById: getDetailClinicById,
+    deleteClinicById: deleteClinicById
 }

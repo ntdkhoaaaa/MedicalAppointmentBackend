@@ -39,9 +39,6 @@ let getAllClinics = () => {
     return new Promise(async (resolve, reject) => {
         try {
             let clinics = await db.Clinics.findAll({
-                attributes: {
-                    exclude: ['descriptionMarkdown', 'descriptionHTML']
-                },
             })
             // console.log(clinics)
             if (clinics) {
@@ -99,8 +96,34 @@ let getDetailClinicById = (id) => {
         }
     })
 }
+let deleteClinicById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'missing parametter'
+                })
+            } else {
+                await db.Clinics.destroy({
+                    where: {
+                        id: id
+                    }
+                })
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Success'
+                })
+            }
+        }
+        catch (e) {
+            reject(e);
+        }
+    })
+}
 module.exports = {
     postNewClinic: postNewClinic,
     getAllClinics: getAllClinics,
-    getDetailClinicById: getDetailClinicById
+    getDetailClinicById: getDetailClinicById,
+    deleteClinicById: deleteClinicById
 }

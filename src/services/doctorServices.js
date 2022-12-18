@@ -280,7 +280,10 @@ let bulkCreateSchedule = (data) => {
                 await db.Schedule.destroy({
                     where: {
                         doctorId: data.doctorId,
-                        date: data.date
+                        date: data.date,
+                        maxNumber: {
+                            [Op.eq]: doctorInfo.count
+                        }
                     }
                 })
                 let schedule = data.arrSchedule;
@@ -766,7 +769,7 @@ let getRatingDoctor = (data) => {
                         let firstDate = new Date(el.updatedAt),
                             secondDate = new Date(),
                             timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
-                        let differentDays = Math.ceil(timeDifference / (1000 * 3600 * 24));
+                        let differentDays = Math.floor(timeDifference / (1000 * 3600 * 24));
                         let sothang = parseInt(differentDays / 30);
                         let songay = differentDays;
                         o.songay = songay;

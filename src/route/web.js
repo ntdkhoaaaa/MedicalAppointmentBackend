@@ -60,7 +60,7 @@ let initWebRoute = (app) => {
     router.post('/api/add-new-clinic', clinicController.postNewClinic);
     router.get('/api/get-all-clinics', clinicController.getAllClinics);
     router.get('/api/get-detail-clinic-byId', clinicController.getDetailClinicById)
-
+    router.get('/api/delete-clinic-by-id', clinicController.deleteClinicById)
 
     router.get('/api/get-all-appointment-of-user', patientController.getBookingInfoByProfile)
     router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor);

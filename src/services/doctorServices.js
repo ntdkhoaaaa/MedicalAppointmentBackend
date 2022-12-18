@@ -280,7 +280,10 @@ let bulkCreateSchedule = (data) => {
                 await db.Schedule.destroy({
                     where: {
                         doctorId: data.doctorId,
-                        date: data.date
+                        date: data.date,
+                        maxNumber: {
+                            [Op.eq]: doctorInfo.count
+                        }
                     }
                 })
                 let schedule = data.arrSchedule;
@@ -744,6 +747,8 @@ let getRatingDoctor = (data) => {
                     where: {
                         doctorId: data
                     },
+                    raw: true,
+                    nest: true,
                     include: [
                         {
                             model: db.Booking,
@@ -769,9 +774,21 @@ let getRatingDoctor = (data) => {
                     // ratingInfo.Booking.patientData.image = new Buffer(users.image, 'base64').toString('binary');
                 }
                 if (ratingInfo) {
+                    var result = await ratingInfo.map(function (el) {
+                        var o = Object.assign({}, el);
+                        let firstDate = new Date(el.updatedAt),
+                            secondDate = new Date(),
+                            timeDifference = Math.abs(secondDate.getTime() - firstDate.getTime());
+                        let differentDays = Math.floor(timeDifference / (1000 * 3600 * 24));
+                        let sothang = parseInt(differentDays / 30);
+                        let songay = differentDays;
+                        o.songay = songay;
+                        o.sothang = sothang;
+                        return o;
+                    })
                     resolve({
                         errCode: 0,
-                        ratingInfo: ratingInfo
+                        ratingInfo: result
                     })
                 }
                 else {

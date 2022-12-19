@@ -290,10 +290,39 @@ let postRatingPatient = (data) => {
         }
     })
 }
+let getDataSearch = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let dataDoctor = await db.User.findAll({
+                where: {
+                    roleId: 'R2'
+                },
+                attributes: ['firstName', 'lastName', 'id'],
+            })
+            let dataSpecialty = await db.Specialty.findAll({
+                attributes: ['name', 'id'],
+            })
+            let dataClinic = await db.Clinics.findAll({
+                attributes: ['name', 'id'],
+            })
+            resolve({
+                errCode: 0,
+                dataDoctor,
+                dataClinic,
+                dataSpecialty
+            })
+        }
+        catch (e) {
+            console.log(e)
+            reject(e);
+        }
+    })
+}
 module.exports = {
     postBookingAppointment: postBookingAppointment,
     postVerifyBooking: postVerifyBooking,
     getBookingInfoByProfile: getBookingInfoByProfile,
     cancelBookingformPatient: cancelBookingformPatient,
-    postRatingPatient: postRatingPatient
+    postRatingPatient: postRatingPatient,
+    getDataSearch: getDataSearch
 }

@@ -99,6 +99,7 @@ let initWebRoute = (app) => {
     router.post('/api/get-info-reset-password-by-token', userController.handleInfoResetPasswordByToken);
     router.post('/api/reset-password', userController.handleResetPassword);
 
+    router.get('/api/get-data-search', patientController.getDataSearch);
 
     return app.use("/", router)
 }

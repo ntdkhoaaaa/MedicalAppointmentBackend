@@ -297,14 +297,36 @@ let getDataSearch = (data) => {
                 where: {
                     roleId: 'R2'
                 },
-                attributes: ['firstName', 'lastName', 'id'],
+                include: [
+                    { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+
+                ]
             })
+            if (dataDoctor) {
+                dataDoctor.forEach(element => {
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
+                });
+            }
             let dataSpecialty = await db.Specialty.findAll({
-                attributes: ['name', 'id'],
             })
+            if (dataSpecialty) {
+                dataSpecialty.forEach(element => {
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
+                });
+            }
             let dataClinic = await db.Clinics.findAll({
-                attributes: ['name', 'id'],
             })
+            if (dataClinic) {
+                dataClinic.forEach(element => {
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
+                });
+            }
             resolve({
                 errCode: 0,
                 dataDoctor,

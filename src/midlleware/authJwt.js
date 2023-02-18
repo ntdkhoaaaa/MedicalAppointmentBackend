@@ -53,9 +53,19 @@ let checkPermissionByToken = async (req, res) => {
             else {
                 let data = await db.User.findOne({
                     attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id'],
+
                     where: { id: decoded.id },
-                    raw: true
+                    include:[
+                        {
+                            model:db.Doctor_Infor,
+                            attributes:['clinicId']
+                        }
+                    ],
+                    raw: true,
+                    nest: true
                 });
+                console.log('effewf',data);
+
                 return res.status(200).json({
                     errCode: 0,
                     role: decoded.roleId,

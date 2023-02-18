@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs"
 const salt = bcrypt.genSaltSync(10);
 const jwt = require("jsonwebtoken");
 import sendEmailSimple from './emailServices'
+import doctor_infor from "../models/doctor_infor";
 
 const cookieParser = require("cookie-parser");
 let buildUrlEmail = (token) => {
@@ -22,11 +23,18 @@ let handleUserLogin = (email, password) => {
                 let user = await db.User.findOne({
                     attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName', 'phoneNumber', 'address', 'gender'],
                     where: { email: email, statusId: 'S2' },
+                    include:[
+                        {
+                            model:db.Doctor_Infor,
+                            attributes:['clinicId']
+                        }
+                    ],
+                    nest:true,
                     raw: true
                 });
                 if (user) {
                     let check = await bcrypt.compareSync(password, user.password);
-                    // console.log('wfwefe')
+                    console.log(user)
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'Ok';

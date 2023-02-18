@@ -52,21 +52,28 @@ let initWebRoute = (app) => {
 
     router.post('/api/patient-booking-appointment', patientController.postBookingAppointment)
     router.post('/api/verify-booking', patientController.postVerifyBooking);
-
+    //specialty
     router.post('/api/add-new-specialty', specialtyController.postNewSpecialty);
     router.get('/api/get-all-specialties', specialtyController.getAllSpecialities)
     router.get('/api/get-detail-specialty-byId', specialtyController.getDetailSpecialtyById)
+    router.get('/api/delete-specialty-by-id', specialtyController.deleteSpecialtyById)
+    router.post('/api/update-specialty-by-id', specialtyController.updateSpecialtyData);
 
+    //clinic
     router.post('/api/add-new-clinic', clinicController.postNewClinic);
     router.get('/api/get-all-clinics', clinicController.getAllClinics);
     router.get('/api/get-detail-clinic-byId', clinicController.getDetailClinicById)
     router.get('/api/delete-clinic-by-id', clinicController.deleteClinicById)
+
     router.post('/api/add-new-medicine', clinicController.addNewMedicine)
     router.get('/api/get-medicine-by-clinicId', clinicController.getMedicineByClinicId)
     router.delete('/api/delete-medicine-by-id', clinicController.deleteMedicineById)
     router.put('/api/edit-medicine-infor', clinicController.editMedicineInfor);
     router.get('/api/get-medicine-by-Id', clinicController.getMedicineById)
 
+
+
+    router.post('/api/update-clinic-by-id', clinicController.updateClinicbyId);
 
 
     router.get('/api/get-all-appointment-of-user', patientController.getBookingInfoByProfile)
@@ -100,6 +107,10 @@ let initWebRoute = (app) => {
     router.post('/api/forgot-password', userController.handleForgotPassword);
     router.post('/api/get-info-reset-password-by-token', userController.handleInfoResetPasswordByToken);
     router.post('/api/reset-password', userController.handleResetPassword);
+
+
+    router.get('/api/get-data-search', patientController.getDataSearch);
+
     return app.use("/", router)
 }
 module.exports = initWebRoute;

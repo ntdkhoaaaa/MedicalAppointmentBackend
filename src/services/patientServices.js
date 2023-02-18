@@ -290,10 +290,61 @@ let postRatingPatient = (data) => {
         }
     })
 }
+let getDataSearch = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let dataDoctor = await db.User.findAll({
+                where: {
+                    roleId: 'R2'
+                },
+                include: [
+                    { model: db.Allcode, as: 'positionData', attributes: ['valueEn', 'valueVi'] },
+
+                ]
+            })
+            if (dataDoctor) {
+                dataDoctor.forEach(element => {
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
+                });
+            }
+            let dataSpecialty = await db.Specialty.findAll({
+            })
+            if (dataSpecialty) {
+                dataSpecialty.forEach(element => {
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
+                });
+            }
+            let dataClinic = await db.Clinics.findAll({
+            })
+            if (dataClinic) {
+                dataClinic.forEach(element => {
+                    if (element.image) {
+                        element.image = new Buffer(element.image, 'base64').toString('binary');
+                    }
+                });
+            }
+            resolve({
+                errCode: 0,
+                dataDoctor,
+                dataClinic,
+                dataSpecialty
+            })
+        }
+        catch (e) {
+            console.log(e)
+            reject(e);
+        }
+    })
+}
 module.exports = {
     postBookingAppointment: postBookingAppointment,
     postVerifyBooking: postVerifyBooking,
     getBookingInfoByProfile: getBookingInfoByProfile,
     cancelBookingformPatient: cancelBookingformPatient,
-    postRatingPatient: postRatingPatient
+    postRatingPatient: postRatingPatient,
+    getDataSearch: getDataSearch
 }

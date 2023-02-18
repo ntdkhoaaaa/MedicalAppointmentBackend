@@ -62,6 +62,7 @@ let getAllClinics = () => {
     }
   });
 };
+
 let getDetailClinicById = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -272,14 +273,56 @@ let getMedicineById = (id) => {
     }
   });
 };
+let updateClinicData = (data) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          if (!data.id || !data.name || !data.imageBase64 || !data.nameEn
+              || !data.descriptionHTML || !data.descriptionMarkdown
+              || !data.address || !data.addressEn) {
+              resolve({
+                  errCode: 1,
+                  errMessage: "Missing required parameters!"
+              })
+          }
+          let clinic = await db.Clinics.findOne({
+              where: { id: data.id },
+          })
+          if (clinic) {
+              clinic.name = data.name;
+              clinic.nameEn = data.nameEn;
+              clinic.address = data.address;
+              clinic.descriptionHTML = data.descriptionHTML;
+              clinic.descriptionMarkdown = data.descriptionMarkdown;
+              clinic.address = data.address;
+              clinic.addressEn = data.addressEn;
+              clinic.image = data.imageBase64;
+              await clinic.save();
+              resolve({
+                  errCode: 0,
+                  errMessage: 'Updated'
+              })
+          }
+          else {
+              resolve({
+                  errCode: 1,
+                  errMessage: 'Clinic not found!'
+              });
+          }
+      } catch (e) {
+          reject(e)
+      }
+  })
+}
 module.exports = {
   postNewClinic: postNewClinic,
   getAllClinics: getAllClinics,
   getDetailClinicById: getDetailClinicById,
   deleteClinicById: deleteClinicById,
+  updateClinicData: updateClinicData,
   addNewMedicine: addNewMedicine,
   getMedicineByClinicId: getMedicineByClinicId,
   deleteMedicineById:deleteMedicineById,
   editMedicineInfor:editMedicineInfor,
   getMedicineById:getMedicineById
 };
+

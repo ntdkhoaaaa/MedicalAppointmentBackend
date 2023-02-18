@@ -10,6 +10,17 @@ let postNewClinic = async (req, res) => {
         })
     }
 }
+let updateClinicbyId = async (req, res) => {
+    try {
+        let infor = await clinicServices.updateClinicData(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 let getAllClinics = async (req, res) => {
     try {
         let infor = await clinicServices.getAllClinics();
@@ -112,5 +123,6 @@ module.exports = {
     getMedicineByClinicId:getMedicineByClinicId,
     deleteMedicineById:deleteMedicineById,
     editMedicineInfor:editMedicineInfor,
-    getMedicineById:getMedicineById
+    getMedicineById:getMedicineById,
+    updateClinicbyId: updateClinicbyId
 }

@@ -4,6 +4,7 @@ import viewEngine from "./config/viewEngine";
 import initWebRoutes from './route/web';
 import connectDB from './config/connectDB';
 import cors from 'cors'
+import deleteFreshToken from "./config/refreshtoken"
 
 const cookieParser = require("cookie-parser");
 const schedule = require('node-schedule');
@@ -50,6 +51,6 @@ let port = process.env.PORT || 6969;
 app.listen(port, () => {
     console.log("Backend Nodejs is running on the port: " + port);
 })
-// const job = schedule.scheduleJob('*/2 * * * * *', function () {
-//     console.log('The answer to life, the universe, and everything!');
-// });
+const job = schedule.scheduleJob('59 * * * *', async function async() {
+    let a = await deleteFreshToken.deleteFreshToken();
+});

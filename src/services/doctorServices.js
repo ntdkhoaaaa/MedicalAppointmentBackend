@@ -110,7 +110,6 @@ let validateInputDataArray = (inputData) => {
 let saveDetailedInfor = (inputData) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log('check input', inputData)
             let validateInput = validateInputDataArray(inputData);
             if (validateInput.isValid === false) {
                 resolve({
@@ -118,7 +117,6 @@ let saveDetailedInfor = (inputData) => {
                     errMessage: `Missing parameter ${validateInput.element}!`
                 })
             } else {
-                console.log('check input', inputData)
                 let isExist = await db.Markdown.findOne({
                     where: { doctorId: inputData.doctorId }
                 })
@@ -139,7 +137,7 @@ let saveDetailedInfor = (inputData) => {
                     isExist.updateAt = new Date();
                     await isExist.save();
                 }
-                console.log('Markdown saved Successfully', isExist)
+       
                 let doctorInfor = await db.Doctor_Infor.findOne({
                     where: {
                         doctorId: inputData.doctorId,
@@ -379,7 +377,7 @@ let deleteSelectedSchedule = (data) => {
         let schedule = await db.Schedule.findOne({
             where: { id: data }
         })
-        console.log('logdataa', data)
+   
         if (!schedule) {
             resolve({
                 errCode: 2,
@@ -398,7 +396,7 @@ let deleteSelectedSchedule = (data) => {
 let getExtraInforDoctorById = (doctorId) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log('getExtraInforDoctorById')
+  
             if (!doctorId) {
                 resolve({
                     errCode: 1,
@@ -763,12 +761,11 @@ let getRatingDoctor = (data) => {
                         }
                     ]
                 })
-                console.log('check image', ratingInfo[0].Booking.patientData.image)
+        
                 if (ratingInfo) {
                     ratingInfo.forEach(element => {
                         if (element.Booking.patientData.image) {
                             element.Booking.patientData.image = new Buffer(element.Booking.patientData.image, 'base64').toString('binary');
-
                         }
                     })
                     // ratingInfo.Booking.patientData.image = new Buffer(users.image, 'base64').toString('binary');

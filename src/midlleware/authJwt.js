@@ -64,7 +64,6 @@ let checkPermissionByToken = async (req, res) => {
                     raw: true,
                     nest: true
                 });
-                console.log('effewf',data);
 
                 return res.status(200).json({
                     errCode: 0,

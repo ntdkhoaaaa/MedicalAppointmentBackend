@@ -33,6 +33,7 @@ module.exports = (sequelize, DataTypes) => {
     roleId: DataTypes.STRING,
     positionId: DataTypes.STRING,
     statusId: DataTypes.STRING,
+    clinicId:DataTypes.INTEGER
   }, {
     sequelize,
     modelName: 'User',

@@ -34,7 +34,7 @@ let handleUserLogin = (email, password) => {
                 });
                 if (user) {
                     let check = await bcrypt.compareSync(password, user.password);
-                    console.log(user)
+         
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'Ok';
@@ -111,7 +111,7 @@ let getAllUsers = (userId) => {
                 }
             }
             if (userId && userId !== 'ALL') {
-                console.log('check profilee user')
+        
                 users = await db.User.findOne({
                     where: { id: userId },
                     attributes: {
@@ -436,7 +436,7 @@ let postVerifyRegister = (data) => {
 let handleForgotPassword = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            console.log('parram', data)
+      
             if (!data.email) {
                 resolve({
                     errCode: 1,

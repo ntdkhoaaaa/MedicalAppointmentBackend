@@ -43,7 +43,6 @@ let getAllClinics = () => {
   return new Promise(async (resolve, reject) => {
     try {
       let clinics = await db.Clinics.findAll({});
-      // console.log(clinics)
       if (clinics) {
         clinics.forEach((element) => {
           if (element.image) {
@@ -126,11 +125,89 @@ let deleteClinicById = (id) => {
     }
   });
 };
+let checkMedicineCode = (medicineCode) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!medicineCode) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+
+        let data = await db.Medicine.findOne({
+          where: {
+            medicineCode: medicineCode,
+          },
+        });
+        if (data) {
+          resolve({
+            errCode: 0,
+            result: true,
+          });
+        } else {
+          resolve({
+            errCode: 0,
+            result: false,
+            
+          });
+        }
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+let warningDuplicateMedicine=(data)=>{
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        console.log('check data',data)
+        let arrMedicine = data;
+        let warningDuplicateMedicine = new Array();
+        if(arrMedicine)
+        {
+          for(const medicine of arrMedicine)
+          {
+            let res= await checkMedicineCode(medicine.medicineCode)
+            if(res && res.result===true){
+              warningDuplicateMedicine.push(medicine.medicineCode)
+            }
+          }
+        }
+        if(warningDuplicateMedicine.length>0)
+        {
+          resolve({
+            errCode:0,
+            data:{
+              result: true,
+              warningDuplicateMedicine:warningDuplicateMedicine, 
+            }
+          })
+        }
+        else{
+          resolve({
+            errCode:0,
+            data:{
+              result: false,
+            }
+          })
+        }
+
+        
+      }
+    } catch (e) {
+      reject(e);
+    }})
+}
 let addNewMedicine = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log(data);
-
       if (!data.clinicId) {
         resolve({
           errCode: 1,
@@ -146,7 +223,6 @@ let addNewMedicine = (data) => {
         } else {
           db.Medicine.create(arrMedicine[0]);
         }
-
         resolve({
           errCode: 0,
           errMessage: "Save medicine success",
@@ -213,35 +289,35 @@ let deleteMedicineById = (id) => {
     }
   });
 };
-let editMedicineInfor=(data)=>{
+let editMedicineInfor = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!data.id ||!data.nameMedicine ||!data.unit ||!data.price) {
+      if (!data.id || !data.nameMedicine || !data.unit || !data.price) {
         resolve({
           errCode: 1,
           errMessage: "Missing required parameters",
         });
       } else {
-        let medicine=await db.Medicine.findOne({
-          where:{id:data.id}
-        })
-        if(medicine){
-          medicine.nameMedicine=data.nameMedicine;
-          medicine.unit=data.unit;
-          medicine.price=data.price;
+        let medicine = await db.Medicine.findOne({
+          where: { id: data.id },
+        });
+        if (medicine) {
+          medicine.nameMedicine = data.nameMedicine;
+          medicine.unit = data.unit;
+          medicine.price = data.price;
+          medicine.medicineCode = data.medicineCode;
           await medicine.save();
           resolve({
             errCode: 0,
             errMessage: "Success",
           });
         }
-
       }
     } catch (e) {
       reject(e);
     }
   });
-}
+};
 let getMedicineById = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -275,44 +351,50 @@ let getMedicineById = (id) => {
 };
 let updateClinicData = (data) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          if (!data.id || !data.name || !data.imageBase64 || !data.nameEn
-              || !data.descriptionHTML || !data.descriptionMarkdown
-              || !data.address || !data.addressEn) {
-              resolve({
-                  errCode: 1,
-                  errMessage: "Missing required parameters!"
-              })
-          }
-          let clinic = await db.Clinics.findOne({
-              where: { id: data.id },
-          })
-          if (clinic) {
-              clinic.name = data.name;
-              clinic.nameEn = data.nameEn;
-              clinic.address = data.address;
-              clinic.descriptionHTML = data.descriptionHTML;
-              clinic.descriptionMarkdown = data.descriptionMarkdown;
-              clinic.address = data.address;
-              clinic.addressEn = data.addressEn;
-              clinic.image = data.imageBase64;
-              await clinic.save();
-              resolve({
-                  errCode: 0,
-                  errMessage: 'Updated'
-              })
-          }
-          else {
-              resolve({
-                  errCode: 1,
-                  errMessage: 'Clinic not found!'
-              });
-          }
-      } catch (e) {
-          reject(e)
+    try {
+      if (
+        !data.id ||
+        !data.name ||
+        !data.imageBase64 ||
+        !data.nameEn ||
+        !data.descriptionHTML ||
+        !data.descriptionMarkdown ||
+        !data.address ||
+        !data.addressEn
+      ) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters!",
+        });
       }
-  })
-}
+      let clinic = await db.Clinics.findOne({
+        where: { id: data.id },
+      });
+      if (clinic) {
+        clinic.name = data.name;
+        clinic.nameEn = data.nameEn;
+        clinic.address = data.address;
+        clinic.descriptionHTML = data.descriptionHTML;
+        clinic.descriptionMarkdown = data.descriptionMarkdown;
+        clinic.address = data.address;
+        clinic.addressEn = data.addressEn;
+        clinic.image = data.imageBase64;
+        await clinic.save();
+        resolve({
+          errCode: 0,
+          errMessage: "Updated",
+        });
+      } else {
+        resolve({
+          errCode: 1,
+          errMessage: "Clinic not found!",
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 module.exports = {
   postNewClinic: postNewClinic,
   getAllClinics: getAllClinics,
@@ -321,8 +403,9 @@ module.exports = {
   updateClinicData: updateClinicData,
   addNewMedicine: addNewMedicine,
   getMedicineByClinicId: getMedicineByClinicId,
-  deleteMedicineById:deleteMedicineById,
-  editMedicineInfor:editMedicineInfor,
-  getMedicineById:getMedicineById
+  deleteMedicineById: deleteMedicineById,
+  editMedicineInfor: editMedicineInfor,
+  getMedicineById: getMedicineById,
+  warningDuplicateMedicine:warningDuplicateMedicine,
+  checkMedicineCode:checkMedicineCode
 };
-

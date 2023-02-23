@@ -9,7 +9,7 @@ const sequelize = new Sequelize('medicalappointment', 'root', null, {
 let connectDB = async () => {
     try {
         await sequelize.authenticate();
-        console.log('Connection has been established successfully.');
+        ('Connection has been established successfully.');
     } catch (error) {
         console.error('Unable to connect to the database:', error);
     }

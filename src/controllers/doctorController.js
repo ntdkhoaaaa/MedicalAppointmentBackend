@@ -6,7 +6,6 @@ let getTopDoctorHome = async (req, res) => {
         let response = await doctorServices.getTopDoctorHome(+limit);
         return res.status(200).json(response);
     } catch (e) {
-        console.log(e);
         return res.status(200).json({
             errCode: -1,
             message: 'Error from server'
@@ -18,7 +17,6 @@ let getAllDoctors = async (req, res) => {
         let doctors = await doctorServices.getAllDoctors(req.body);
         return res.status(200).json(doctors)
     } catch (e) {
-        console.log(e)
         return res.status(200).json({
             errCode: -1,
             message: 'Error from server'
@@ -53,7 +51,6 @@ let getAllMarkdown = async (req, res) => {
         let markdowns = await doctorServices.getAllMarkdown();
         return res.status(200).json(markdowns)
     } catch (e) {
-        console.log(e)
         return res.status(200).json({
             errCode: -1,
             errMessage: 'Error from server', e
@@ -112,7 +109,6 @@ let deleteSelectedSchedule = async (req, res) => {
 }
 let getExtraInforDoctorById = async (req, res) => {
     try {
-        console.log('check input', req.query.doctorId)
         let infor = await doctorServices.getExtraInforDoctorById(req.query.doctorId);
         return res.status(200).json(infor);
     } catch (e) {
@@ -172,7 +168,6 @@ let getRatingDoctor = async (req, res) => {
         let infor = await doctorServices.getRatingDoctor(req.query.doctorId);
         return res.status(200).json(infor)
     } catch (e) {
-        console.log(e)
         return res.status(200).json({
             errCode: -1,
             errMessage: 'Error from server'

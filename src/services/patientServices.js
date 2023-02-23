@@ -88,7 +88,7 @@ let postVerifyBooking = (data) => {
                 if (appointment) {
                     appointment.statusId = 'S2';
                     await appointment.save();
-                    console.log('appointment ', appointment.dataValues.timeType)
+               
                     let scheduleInfo = await db.Schedule.findOne({
                         where: {
                             doctorId: data.doctorId,

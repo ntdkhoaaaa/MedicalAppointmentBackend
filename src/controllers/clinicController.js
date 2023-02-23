@@ -56,7 +56,6 @@ let deleteClinicById = async (req, res) => {
 }
 let addNewMedicine = async (req, res) => {
     try {
-        console.log(req.body)
         let infor = await clinicServices.addNewMedicine(req.body);
         return res.status(200).json(infor)
     } catch (e) {
@@ -67,9 +66,19 @@ let addNewMedicine = async (req, res) => {
         })
     }
 }
+let warningDuplicateMedicine = async (req, res) => {
+    try {
+        let infor = await clinicServices.warningDuplicateMedicine(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server ' +e
+        })
+    }
+}
 let getMedicineByClinicId = async (req, res) => {
     try {
-        console.log('',req.query)
         let infor = await clinicServices.getMedicineByClinicId(req.query.clinicId);
         return res.status(200).json(infor)
     } catch (e) {
@@ -104,7 +113,6 @@ let editMedicineInfor = async (req, res) => {
 }
 let getMedicineById = async (req, res) => {
     try {
-        console.log('check medicine id',req.query)
         let infor = await clinicServices.getMedicineById(req.query.id);
         return res.status(200).json(infor)
     } catch (e) {
@@ -124,5 +132,6 @@ module.exports = {
     deleteMedicineById:deleteMedicineById,
     editMedicineInfor:editMedicineInfor,
     getMedicineById:getMedicineById,
-    updateClinicbyId: updateClinicbyId
+    updateClinicbyId: updateClinicbyId,
+    warningDuplicateMedicine:warningDuplicateMedicine
 }

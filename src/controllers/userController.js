@@ -76,7 +76,6 @@ let handleDeleteUser = async (req, res) => {
 let getAllCode = async (req, res) => {
     try {
         let data = await userService.getAllCodeService(req.query.type);
-        console.log(data)
         return res.status(200).json(data)
 
     }
@@ -102,7 +101,7 @@ let handleRegister = async (req, res) => {
 let handleRefreshToken = async (req, res) => {
     try {
         let data = await userService.handleRefreshToken(req.body);
-        console.log('db', data)
+
         return res.status(200).json(data);
     } catch (error) {
         console.log(error)
@@ -115,7 +114,6 @@ let handleRefreshToken = async (req, res) => {
 }
 let postVerifyRegister = async (req, res) => {
     try {
-        console.log(req.body.token)
         let infor = await userService.postVerifyRegister(req.body);
         return res.status(200).json(infor)
     } catch (e) {

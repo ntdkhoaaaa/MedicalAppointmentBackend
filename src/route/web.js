@@ -67,10 +67,11 @@ let initWebRoute = (app) => {
 
     router.post('/api/add-new-medicine', clinicController.addNewMedicine)
     router.get('/api/get-medicine-by-clinicId', clinicController.getMedicineByClinicId)
+    router.post('/api/check-dulicate-medicine', clinicController.warningDuplicateMedicine)
     router.delete('/api/delete-medicine-by-id', clinicController.deleteMedicineById)
     router.put('/api/edit-medicine-infor', clinicController.editMedicineInfor);
     router.get('/api/get-medicine-by-Id', clinicController.getMedicineById)
-
+    
 
 
     router.post('/api/update-clinic-by-id', clinicController.updateClinicbyId);

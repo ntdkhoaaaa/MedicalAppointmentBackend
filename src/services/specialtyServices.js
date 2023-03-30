@@ -181,10 +181,130 @@ let updateSpecialtyData = (data) => {
         }
     })
 }
+let AddNewSpecialtiesOfClinic = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            // || !data.descriptionHTML || !data.descriptionMarkdown    
+            if (!data.name || !data.imageBase64 || !data.nameEn ||!data.clinicId) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'Missing required parameters'
+                })
+            }
+            else {
+                console.log(data.imageBase64)
+                
+                await db.ClinicSpecialties.create({
+                    name: data.name,
+                    nameEn: data.nameEn,
+                    image: data.imageBase64,
+                    clinicId: data.clinicId,
+                    descriptionHTML: data.descriptionHTML,
+                    descriptionMarkdown: data.descriptionMarkdown
+                })
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Save new specialties success',
+                    // data: data
+                })
+            }
+        } catch (e) {
+            console.log(e)
+            reject(e);
+        }
+    })
+}
+let getAllSpecialitiesOfClinic = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            let specialties = await db.ClinicSpecialty.findAll({
+                where:{clinicId:data}
+            })
+            if (specialties) {
+                specialties.forEach(element => {
+                    element.image = new Buffer(element.image, 'base64').toString('binary');
+                });
+            }
+            resolve({
+                errCode: 0,
+                data: specialties
+            })
+        }
+        catch (e) {
+            reject(e);
+        }
+    })
+}
+
+let deleteClinicSpecialtyById = (id) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!id) {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'missing parametter'
+                })
+            } else {
+                await db.ClinicSpecialty.destroy({
+                    where: {
+                        id: id
+                    }
+                })
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Success'
+                })
+            }
+        }
+        catch (e) {
+            reject(e);
+        }
+    })
+}
+let updateClinicSpecialtyData = (data) => {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (!data.id || !data.name || !data.imageBase64 || !data.nameEn
+                || !data.descriptionHTML || !data.descriptionMarkdown) {
+                resolve({
+                    errCode: 1,
+                    errMessage: "Missing required parameters!"
+                })
+            }
+            let specialty = await db.ClinicSpecialty.findOne({
+                where: { id: data.id },
+            })
+            if (specialty) {
+                specialty.name = data.name;
+                specialty.nameEn = data.nameEn;
+                specialty.descriptionHTML = data.descriptionHTML;
+                specialty.descriptionMarkdown = data.descriptionMarkdown;
+                specialty.image = data.imageBase64;
+                await specialty.save();
+                resolve({
+                    errCode: 0,
+                    errMessage: 'Updated'
+                })
+            }
+            else {
+                resolve({
+                    errCode: 1,
+                    errMessage: 'specialty not found!'
+                });
+            }
+        } catch (e) {
+            reject(e)
+        }
+    })
+}
 module.exports = {
     postNewSpecialty: postNewSpecialty,
     getAllSpecialities: getAllSpecialities,
     getDetailSpecialtyById: getDetailSpecialtyById,
     deleteSpecialtyById: deleteSpecialtyById,
-    updateSpecialtyData: updateSpecialtyData
+    updateSpecialtyData: updateSpecialtyData,
+    AddNewSpecialtiesOfClinic:AddNewSpecialtiesOfClinic,
+    getAllSpecialitiesOfClinic:getAllSpecialitiesOfClinic,
+    deleteClinicSpecialtyById:deleteClinicSpecialtyById,
+    updateClinicSpecialtyData:updateClinicSpecialtyData
 }

@@ -21,7 +21,7 @@ let handleUserLogin = (email, password) => {
             let isExist = await checkUserEmail(email);
             if (isExist) {
                 let user = await db.User.findOne({
-                    attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName', 'phoneNumber', 'address', 'gender'],
+                    attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName', 'phoneNumber', 'address', 'gender','clinicId'],
                     where: { email: email, statusId: 'S2' },
                     include:[
                         {
@@ -32,6 +32,7 @@ let handleUserLogin = (email, password) => {
                     nest:true,
                     raw: true
                 });
+
                 if (user) {
                     let check = await bcrypt.compareSync(password, user.password);
          
@@ -104,7 +105,6 @@ let getAllUsers = (userId) => {
                     users.forEach(element => {
                         if (element.image) {
                             element.image = new Buffer(element.image, 'base64').toString('binary');
-
                         }
                     });
                     // data.image = new Buffer(data.image, 'base64').toString('binary');
@@ -153,7 +153,8 @@ let createNewUser = (data) => {
                     roleId: data.roleId,
                     positionId: data.positionId,
                     image: data.avatar,
-                    statusId: 'S2'
+                    statusId: data.statusId,
+                    clinicId: data.clinicId
                 })
                 resolve({
                     errCode: 0,
@@ -198,7 +199,7 @@ let deleteUser = (userId) => {
 let updateUserData = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.id || !data.roleId || !data.positionId || !data.gender) {
+            if (!data.id || !data.roleId  || !data.gender) {
                 resolve({
                     errCode: 2,
                     errMessage: "Missing required parameters!"
@@ -216,6 +217,8 @@ let updateUserData = (data) => {
                 user.gender = data.gender;
                 user.phoneNumber = data.phoneNumber;
                 user.image = data.avatar;
+                user.clinicId = data.clinicId;
+
                 await user.save();
                 resolve({
                     errCode: 0,

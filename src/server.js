@@ -5,6 +5,7 @@ import initWebRoutes from './route/web';
 import connectDB from './config/connectDB';
 import cors from 'cors'
 import deleteFreshToken from "./config/refreshtoken"
+// const db = require("../app/models")
 
 const cookieParser = require("cookie-parser");
 const schedule = require('node-schedule');

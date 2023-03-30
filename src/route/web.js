@@ -7,7 +7,7 @@ import patientController from "../controllers/patientController";
 import specialtyController from "../controllers/specialtyController";
 import clinicController from "../controllers/clinicController";
 import authJwt from "../midlleware/authJwt";
-
+import clinicAccountantController from "../controllers/clinicAccountantController";
 let router = express.Router();
 // let passport = require('passport');
 let initWebRoute = (app) => {
@@ -54,15 +54,21 @@ let initWebRoute = (app) => {
     router.post('/api/verify-booking', patientController.postVerifyBooking);
     //specialty
     router.post('/api/add-new-specialty', specialtyController.postNewSpecialty);
+    router.post('/api/add-new-specialties-of-clinic', specialtyController.AddNewSpecialtiesOfClinic);
     router.get('/api/get-all-specialties', specialtyController.getAllSpecialities)
+    router.post('/api/get-all-specialties-of-clinic', specialtyController.getAllSpecialitiesOfClinic)
     router.get('/api/get-detail-specialty-byId', specialtyController.getDetailSpecialtyById)
     router.get('/api/delete-specialty-by-id', specialtyController.deleteSpecialtyById)
     router.post('/api/update-specialty-by-id', specialtyController.updateSpecialtyData);
+    router.get('/api/delete-clinic-specialty-by-id', specialtyController.deleteClinicSpecialtyById)
+    router.post('/api/update-clinic-specialty-by-id', specialtyController.updateClinicSpecialtyData);
 
     //clinic
     router.post('/api/add-new-clinic', clinicController.postNewClinic);
+    router.post('/api/create-bulk-schedules-for-doctors', clinicAccountantController.bulkCreateSchedulesForDoctors);
     router.get('/api/get-all-clinics', clinicController.getAllClinics);
     router.get('/api/get-detail-clinic-byId', clinicController.getDetailClinicById)
+    router.get('/api/get-detail-clinic-byId-in-accountantside', clinicController.getDetailClinicInAccountantSide)
     router.get('/api/delete-clinic-by-id', clinicController.deleteClinicById)
 
     router.post('/api/add-new-medicine', clinicController.addNewMedicine)
@@ -72,6 +78,9 @@ let initWebRoute = (app) => {
     router.put('/api/edit-medicine-infor', clinicController.editMedicineInfor);
     router.get('/api/get-medicine-by-Id', clinicController.getMedicineById)
     
+    router.post('/api/get-all-doctor-clinic', clinicController.getAllDoctorOfClinic);
+    router.post('/api/get-clinic-week-schedules', clinicAccountantController.getClinicWeekSchedules);
+    router.post('/api/create-new-doctor', clinicAccountantController.createNewDoctor);
 
 
     router.post('/api/update-clinic-by-id', clinicController.updateClinicbyId);

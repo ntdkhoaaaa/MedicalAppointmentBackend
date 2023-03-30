@@ -43,6 +43,17 @@ let getDetailClinicById = async (req, res) => {
         })
     }
 }
+let getDetailClinicInAccountantSide = async (req, res) => {
+    try {
+        let infor = await clinicServices.getDetailClinicInAccountantSide(req.query.id);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 let deleteClinicById = async (req, res) => {
     try {
         let infor = await clinicServices.deleteClinicById(req.query.id);
@@ -122,7 +133,32 @@ let getMedicineById = async (req, res) => {
         })
     }
 }
+let getAllDoctorOfClinic = async (req, res) => {
+    try {
+        console.log(req.body.clinicId,req.body.specialtyCode,req.body.positionCode)
+        let infor = await clinicServices.getAllDoctorOfClinic(req.body.clinicId,req.body.specialtyCode,req.body.positionCode);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+let bulkCreateSchedulesForDoctors = async (req, res) => {
+    try {
+        console.log(req.body.arrSchedule)
+        let infor = await clinicServices.bulkCreateSchedulesForDoctors(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
 module.exports = {
+    bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
     postNewClinic: postNewClinic,
     getAllClinics: getAllClinics,
     getDetailClinicById: getDetailClinicById,
@@ -133,5 +169,7 @@ module.exports = {
     editMedicineInfor:editMedicineInfor,
     getMedicineById:getMedicineById,
     updateClinicbyId: updateClinicbyId,
-    warningDuplicateMedicine:warningDuplicateMedicine
+    warningDuplicateMedicine:warningDuplicateMedicine,
+    getDetailClinicInAccountantSide:getDetailClinicInAccountantSide,
+    getAllDoctorOfClinic:getAllDoctorOfClinic
 }

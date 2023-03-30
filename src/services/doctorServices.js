@@ -5,7 +5,7 @@ import sendEmailSimple from './emailServices'
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE
 import _ from 'lodash';
 const { Op } = require("sequelize");
-
+// const  ClinicSchedules  = require('../../models/Product/order')(sequelize, DataTypes);
 let getTopDoctorHome = (limitInput) => {
     return new Promise(async (resolve, reject) => {
         try {
@@ -802,7 +802,6 @@ let getRatingDoctor = (data) => {
         }
     })
 }
-
 let getScheduleByDateFromDoctor = (doctorId, date) => {
     return new Promise(async (resolve, reject) => {
         try {

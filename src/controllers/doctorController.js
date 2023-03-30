@@ -59,6 +59,8 @@ let getAllMarkdown = async (req, res) => {
 }
 let bulkCreateSchedule = async (req, res) => {
     try {
+        console.log(req.body.arrSchedule)
+
         let infor = await doctorServices.bulkCreateSchedule(req.body);
         return res.status(200).json(infor)
     } catch (e) {

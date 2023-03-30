@@ -1,5 +1,10 @@
+import { compare } from "bcryptjs";
 import db from "../models/index";
 require("dotenv").config();
+const Sequelize = require("sequelize");
+const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE
+import _ from 'lodash';
+const { Op } = require("sequelize");
 let postNewClinic = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -61,7 +66,50 @@ let getAllClinics = () => {
     }
   });
 };
-
+let getDetailClinicInAccountantSide = (id) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!id) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        let data = await db.Clinics.findOne({
+          where: {
+            id: id,
+          },
+          attributes: [
+            "descriptionHTML",
+            "descriptionMarkdown",
+            "name",
+            "nameEn",
+            "address",
+            "addressEn",
+            "image",
+            "id",
+          ],
+        });
+        if (data.image) {
+          data.image = new Buffer(data.image, "base64").toString("binary");
+        }
+        if (data) {
+          resolve({
+            errCode: 0,
+            data: data,
+          });
+        } else {
+          resolve({
+            errCode: 0,
+            data: {},
+          });
+        }
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 let getDetailClinicById = (id) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -75,7 +123,16 @@ let getDetailClinicById = (id) => {
           where: {
             id: id,
           },
-          attributes: ["descriptionHTML", "descriptionMarkdown"],
+          attributes: [
+            "descriptionHTML",
+            "descriptionMarkdown",
+            "name",
+            "nameEn",
+            "address",
+            "addressEn",
+            "image",
+          ],
+
           include: [
             {
               model: db.Doctor_Infor,
@@ -84,6 +141,9 @@ let getDetailClinicById = (id) => {
             },
           ],
         });
+        if (data.image) {
+          data.image = new Buffer(data.image, "base64").toString("binary");
+        }
         if (data) {
           resolve({
             errCode: 0,
@@ -134,7 +194,6 @@ let checkMedicineCode = (medicineCode) => {
           errMessage: "Missing required parameters",
         });
       } else {
-
         let data = await db.Medicine.findOne({
           where: {
             medicineCode: medicineCode,
@@ -149,7 +208,6 @@ let checkMedicineCode = (medicineCode) => {
           resolve({
             errCode: 0,
             result: false,
-            
           });
         }
       }
@@ -158,7 +216,7 @@ let checkMedicineCode = (medicineCode) => {
     }
   });
 };
-let warningDuplicateMedicine=(data)=>{
+let warningDuplicateMedicine = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (!data) {
@@ -167,44 +225,39 @@ let warningDuplicateMedicine=(data)=>{
           errMessage: "Missing required parameters",
         });
       } else {
-        console.log('check data',data)
+        console.log("check data", data);
         let arrMedicine = data;
         let warningDuplicateMedicine = new Array();
-        if(arrMedicine)
-        {
-          for(const medicine of arrMedicine)
-          {
-            let res= await checkMedicineCode(medicine.medicineCode)
-            if(res && res.result===true){
-              warningDuplicateMedicine.push(medicine.medicineCode)
+        if (arrMedicine) {
+          for (const medicine of arrMedicine) {
+            let res = await checkMedicineCode(medicine.medicineCode);
+            if (res && res.result === true) {
+              warningDuplicateMedicine.push(medicine.medicineCode);
             }
           }
         }
-        if(warningDuplicateMedicine.length>0)
-        {
+        if (warningDuplicateMedicine.length > 0) {
           resolve({
-            errCode:0,
-            data:{
+            errCode: 0,
+            data: {
               result: true,
-              warningDuplicateMedicine:warningDuplicateMedicine, 
-            }
-          })
-        }
-        else{
+              warningDuplicateMedicine: warningDuplicateMedicine,
+            },
+          });
+        } else {
           resolve({
-            errCode:0,
-            data:{
+            errCode: 0,
+            data: {
               result: false,
-            }
-          })
+            },
+          });
         }
-
-        
       }
     } catch (e) {
       reject(e);
-    }})
-}
+    }
+  });
+};
 let addNewMedicine = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -395,7 +448,104 @@ let updateClinicData = (data) => {
     }
   });
 };
+let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!clinicId && !specialtyCode && !positionCode) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        console.log("specialtyCode ", specialtyCode);
+        console.log("positionCode ", positionCode);
+        let data = await db.Doctor_Infor.findAll({
+          where: {
+            clinicId: clinicId,
+          },
+          include: [{ model: db.User, attributes: [] }],
+          attributes: [
+            [Sequelize.literal("`User`.`email`"), "UserEmail"],
+            [Sequelize.literal("`User`.`firstName`"), "firstName"],
+            [Sequelize.literal("`User`.`lastName`"), "lastName"],
+            [Sequelize.literal("`User`.`address`"), "address"],
+            [Sequelize.literal("`User`.`phoneNumber`"), "phoneNumber"],
+            [Sequelize.literal("`User`.`image`"), "image"],
+            [Sequelize.literal("`User`.`positionId`"), "positionId"],
+            "clinicId",
+            "nameSpecialty",
+            "specialtyId",
+            "count",
+            "doctorId"
+          ],
+          exclude: [{ model: db.User }],
+          raw: true,
+          // nest: true,
+        });
+        if (specialtyCode !== "All") {
+          if (data && data.length > 0) {
+            data = data.filter((element) => {
+              return element.specialtyId === specialtyCode;
+            });
+            console.log(data.length);
+          }
+        }
+        if(positionCode!=='All')
+        {
+          if (data && data.length > 0) {
+            data=data.filter((element) =>{
+              return element.positionId.toString()===positionCode;
+            });
+          }
+        }
+        if (data && data.length > 0) {
+          data.map((element) => {
+            element.image = new Buffer(element.image, "base64").toString(
+              "binary"
+            );
+          });
+        }
+        if (data) {
+          resolve({
+            errCode: 0,
+            data: data,
+          });
+        } else {
+          resolve({
+            errCode: 0,
+            data: {},
+          });
+        }
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+let bulkCreateSchedulesForDoctors = (data) => {
+  return new Promise(async (resolve, reject) => {
+      try {
+          if (!data.arrSchedule || !data.clinicId) {
+              resolve({
+                  errCode: 1,
+                  errMessage: 'Missing required parameters'
+              })
+          }
+          else {
+              let schedule=data.arrSchedule
+              await db.schedules_for_clinic.bulkCreate(schedule)
+              resolve({
+                  errCode: 0,
+                  errMessage: 'OKK'
+              })
+          }
+      } catch (e) {
+          reject(e);
+      }
+  })
+}
 module.exports = {
+  bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
   postNewClinic: postNewClinic,
   getAllClinics: getAllClinics,
   getDetailClinicById: getDetailClinicById,
@@ -406,6 +556,8 @@ module.exports = {
   deleteMedicineById: deleteMedicineById,
   editMedicineInfor: editMedicineInfor,
   getMedicineById: getMedicineById,
-  warningDuplicateMedicine:warningDuplicateMedicine,
-  checkMedicineCode:checkMedicineCode
+  warningDuplicateMedicine: warningDuplicateMedicine,
+  checkMedicineCode: checkMedicineCode,
+  getDetailClinicInAccountantSide: getDetailClinicInAccountantSide,
+  getAllDoctorOfClinic: getAllDoctorOfClinic,
 };

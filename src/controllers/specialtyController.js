@@ -19,7 +19,7 @@ let getAllSpecialities = async (req, res) => {
             errCode: -1,
             errMessage: 'Error from server'
         })
-    } screen
+    } 
 }
 let getDetailSpecialtyById = async (req, res) => {
     try {
@@ -55,10 +55,59 @@ let updateSpecialtyData = async (req, res) => {
         })
     }
 }
+let AddNewSpecialtiesOfClinic = async (req, res) => {
+    try {
+        let infor = await specialtyServices.AddNewSpecialtiesOfClinic(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+let getAllSpecialitiesOfClinic = async (req, res) => {
+    try {
+        let infor = await specialtyServices.getAllSpecialitiesOfClinic(req.body.clinicId);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    } 
+}
+let deleteClinicSpecialtyById = async (req, res) => {
+    try {
+        let infor = await specialtyServices.deleteClinicSpecialtyById(req.query.id);
+        return res.status(200).json(infor)
+    } catch (e) {
+        console.log(e)
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+let updateClinicSpecialtyData = async (req, res) => {
+    try {
+        let infor = await specialtyServices.updateClinicSpecialtyData(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     postNewSpecialty: postNewSpecialty,
     getAllSpecialities: getAllSpecialities,
     getDetailSpecialtyById: getDetailSpecialtyById,
     deleteSpecialtyById: deleteSpecialtyById,
-    updateSpecialtyData: updateSpecialtyData
+    updateSpecialtyData: updateSpecialtyData,
+    AddNewSpecialtiesOfClinic:AddNewSpecialtiesOfClinic,
+    getAllSpecialitiesOfClinic:getAllSpecialitiesOfClinic,
+    deleteClinicSpecialtyById:deleteClinicSpecialtyById,
+    updateClinicSpecialtyData:updateClinicSpecialtyData
 }

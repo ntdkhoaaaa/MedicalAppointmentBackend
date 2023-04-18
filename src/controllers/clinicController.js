@@ -135,7 +135,6 @@ let getMedicineById = async (req, res) => {
 }
 let getAllDoctorOfClinic = async (req, res) => {
     try {
-        console.log(req.body.clinicId,req.body.specialtyCode,req.body.positionCode)
         let infor = await clinicServices.getAllDoctorOfClinic(req.body.clinicId,req.body.specialtyCode,req.body.positionCode);
         return res.status(200).json(infor)
     } catch (e) {
@@ -147,7 +146,6 @@ let getAllDoctorOfClinic = async (req, res) => {
 }
 let bulkCreateSchedulesForDoctors = async (req, res) => {
     try {
-        console.log(req.body.arrSchedule)
         let infor = await clinicServices.bulkCreateSchedulesForDoctors(req.body);
         return res.status(200).json(infor)
     } catch (e) {
@@ -156,6 +154,38 @@ let bulkCreateSchedulesForDoctors = async (req, res) => {
             errMessage: 'Error from server'+e
         })
     }
+}
+let createNewDoctorForClinic = async (req, res) => {
+    try {
+        let infor = await clinicServices.createNewDoctorForClinic(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+let editDoctorClinicInfor = async (req, res) => {
+    try {
+        let infor = await clinicServices.editDoctorClinicInfor(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+let handleDeleteDoctorClinic = async (req, res) => {
+    if (!req.body.userId) {
+        return res.status(200).json({
+            errCode: 1,
+            errMessage: "Missing required parameter!"
+        })
+    }
+    let message = await clinicServices.deleteDoctorClinic(req.body.userId)
+    return res.status(200).json(message);
 }
 module.exports = {
     bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
@@ -171,5 +201,8 @@ module.exports = {
     updateClinicbyId: updateClinicbyId,
     warningDuplicateMedicine:warningDuplicateMedicine,
     getDetailClinicInAccountantSide:getDetailClinicInAccountantSide,
-    getAllDoctorOfClinic:getAllDoctorOfClinic
+    getAllDoctorOfClinic:getAllDoctorOfClinic,
+    createNewDoctorForClinic:createNewDoctorForClinic,
+    editDoctorClinicInfor:editDoctorClinicInfor,
+    handleDeleteDoctorClinic:handleDeleteDoctorClinic
 }

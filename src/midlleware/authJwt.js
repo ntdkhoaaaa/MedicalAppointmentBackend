@@ -52,7 +52,7 @@ let checkPermissionByToken = async (req, res) => {
             }
             else {
                 let data = await db.User.findOne({
-                    attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id','clinicId'],
+                    attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id','clinicId','phoneNumber','address','gender'],
 
                     where: { id: decoded.id },
                     include:[

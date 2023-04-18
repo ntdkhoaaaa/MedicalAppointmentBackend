@@ -1,6 +1,8 @@
 import { compare } from "bcryptjs";
 import db from "../models/index";
 require("dotenv").config();
+import bcrypt from "bcryptjs";
+const salt = bcrypt.genSaltSync(10);
 const Sequelize = require("sequelize");
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE
 import _ from 'lodash';
@@ -225,7 +227,6 @@ let warningDuplicateMedicine = (data) => {
           errMessage: "Missing required parameters",
         });
       } else {
-        console.log("check data", data);
         let arrMedicine = data;
         let warningDuplicateMedicine = new Array();
         if (arrMedicine) {
@@ -457,8 +458,6 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
           errMessage: "Missing required parameters",
         });
       } else {
-        console.log("specialtyCode ", specialtyCode);
-        console.log("positionCode ", positionCode);
         let data = await db.Doctor_Infor.findAll({
           where: {
             clinicId: clinicId,
@@ -472,10 +471,14 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
             [Sequelize.literal("`User`.`phoneNumber`"), "phoneNumber"],
             [Sequelize.literal("`User`.`image`"), "image"],
             [Sequelize.literal("`User`.`positionId`"), "positionId"],
+            [Sequelize.literal("`User`.`gender`"), "gender"],
+            [Sequelize.literal("`User`.`id`"), "id"],
             "clinicId",
             "nameSpecialty",
             "specialtyId",
             "count",
+            "priceId",
+            "note",   
             "doctorId"
           ],
           exclude: [{ model: db.User }],
@@ -487,7 +490,6 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
             data = data.filter((element) => {
               return element.specialtyId === specialtyCode;
             });
-            console.log(data.length);
           }
         }
         if(positionCode!=='All')
@@ -544,6 +546,169 @@ let bulkCreateSchedulesForDoctors = (data) => {
       }
   })
 }
+let hashUserPassword = (password) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let hashPassword = await bcrypt.hashSync(password, salt);
+      resolve(hashPassword);
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+let checkUserEmail = (userEmail) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let user = await db.User.findOne({
+        where: { email: userEmail },
+      });
+      if (user) {
+        resolve(true);
+      } else {
+        resolve(false);
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+let createNewDoctorForClinic = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let check = await checkUserEmail(data.email);
+      if (check === true) {
+        resolve({
+          errCode: 1,
+          errMessage: "Your email is already in used.Try another one",
+        });
+      } else {
+        let hashPasswordfrromBcrypt = await hashUserPassword(data.password);
+        await db.User.create({
+          email: data.email,
+          password: hashPasswordfrromBcrypt,
+          firstName: data.firstName,
+          lastName: data.lastName,
+          address: data.address,
+          phoneNumber: data.phoneNumber,
+          gender: data.gender,
+          roleId: "R2",
+          positionId: data.positionId,
+          image: data.avatar,
+          clinicId: data.clinicId,
+        });
+        let userId = await db.User.findOne({
+          where: {
+            email: data.email,
+          },
+          attributes: ["id"],
+        });
+        let specialtyData=await db.Specialty.findOne({
+          where:{id:data.specialtyId}
+        })
+        await db.Doctor_Infor.create({
+          doctorId: userId.id,
+          specialtyId: data.specialtyId,
+          clinicId: data.clinicId,
+          count: data.count,
+          note:data.note,
+          priceId:data.selectedPrice,
+          nameSpecialty:specialtyData.name,
+          nameSpecialtyEn:specialtyData.nameEn
+        });
+        resolve({
+          errCode: 0,
+          errMessage: "Ok",
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+let editDoctorClinicInfor = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.id) {
+        resolve({
+          errCode: 2,
+          errMessage: "Missing required parameters!",
+        });
+      }
+      let user = await db.User.findOne({
+        where: { id: data.id },
+      });
+      let doctorInfor = await db.Doctor_Infor.findOne({
+        where: {
+          doctorId: data.id,
+        },
+      });
+      let specialtyData=await db.Specialty.findOne({
+        where:{id:data.specialtyId}
+      })
+      if (doctorInfor) {
+        doctorInfor.specialtyId = data.specialtyId;
+        doctorInfor.count = data.count;
+        doctorInfor.nameSpecialty=specialtyData.name;
+        doctorInfor.nameSpecialtyEn=specialtyData.nameEn;
+        doctorInfor.priceId=data.selectedPrice;
+        doctorInfor.note=data.note;
+        doctorInfor.clinicId=data.clinicId;
+        await doctorInfor.save();
+      }
+      if (user) {
+        user.firstName = data.firstName;
+        user.lastName = data.lastName;
+        user.address = data.address;
+        user.positionId = data.positionId;
+        user.gender = data.gender;
+        user.phoneNumber = data.phoneNumber;
+        user.image = data.avatar;
+        user.clinicId = data.clinicId;
+        await user.save();
+        resolve({
+          errCode: 0,
+          errMessage: "Updated",
+        });
+      } else {
+        resolve({
+          errCode: 1,
+          errMessage: "User not found!",
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+let deleteDoctorClinic = (userId) => {
+  return new Promise(async (resolve, reject) => {
+    let user = await db.User.findOne({
+      where: { id: userId },
+    });
+    let doctorInfor = await db.Doctor_Infor.findOne({
+      where: {
+        doctorId: userId,
+      },
+    });
+    if (!user && !doctorInfor) {
+      resolve({
+        errCode: 2,
+        errMessage: "This user is not exist",
+      });
+    }
+    await user.destroy({
+      where: { id: userId },
+    });
+    await doctorInfor.destroy({
+      where: { doctorId: userId },
+    });
+
+    resolve({
+      errCode: 0,
+      message: "Completed",
+    });
+  });
+};
 module.exports = {
   bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
   postNewClinic: postNewClinic,
@@ -560,4 +725,7 @@ module.exports = {
   checkMedicineCode: checkMedicineCode,
   getDetailClinicInAccountantSide: getDetailClinicInAccountantSide,
   getAllDoctorOfClinic: getAllDoctorOfClinic,
+  createNewDoctorForClinic:createNewDoctorForClinic,
+  editDoctorClinicInfor:editDoctorClinicInfor,
+  deleteDoctorClinic:deleteDoctorClinic
 };

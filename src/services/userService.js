@@ -22,7 +22,7 @@ let handleUserLogin = (email, password) => {
             if (isExist) {
                 let user = await db.User.findOne({
                     attributes: ['id', 'email', 'roleId', 'password', 'firstName', 'lastName', 'phoneNumber', 'address', 'gender','clinicId'],
-                    where: { email: email, statusId: 'S2' },
+                    where: { email: email },
                     include:[
                         {
                             model:db.Doctor_Infor,
@@ -35,7 +35,6 @@ let handleUserLogin = (email, password) => {
 
                 if (user) {
                     let check = await bcrypt.compareSync(password, user.password);
-         
                     if (check) {
                         userData.errCode = 0;
                         userData.errMessage = 'Ok';
@@ -343,7 +342,7 @@ let handleRefreshToken = (data) => {
                 include: [
                     {
                         model: db.User,
-                        attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id']
+                        attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id','address','phoneNumber']
                     }
                 ],
                 nest: true,

@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         nameClinic: DataTypes.STRING,
         note: DataTypes.STRING,
         count: DataTypes.INTEGER,
-
+        nameSpecialtyEn:DataTypes.STRING,
     }, {
         sequelize,
         modelName: 'Doctor_Infor',

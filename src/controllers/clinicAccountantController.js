@@ -1,7 +1,6 @@
 import clinicAccountantServices from "../services/clinicAccountantServices"
 let bulkCreateSchedulesForDoctors = async (req, res) => {
     try {
-        console.log(req.body.arrSchedule)
         let infor = await clinicAccountantServices.bulkCreateSchedulesForDoctors(req.body);
         return res.status(200).json(infor)
     } catch (e) {
@@ -33,8 +32,44 @@ let createNewDoctor = async (req, res) => {
         })
     }
 }
+let editDoctorInfor = async (req, res) => {
+    try {
+        let infor = await clinicAccountantServices.editDoctorInfor(req.body);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+let getAllDoctorOfHospital = async (req, res) => {
+    try {
+        let infor = await clinicAccountantServices.getAllDoctorOfHospital(req.body.clinicId,req.body.specialtyCode,req.body.positionCode);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+
+let handleDeleteUser = async (req, res) => {
+    if (!req.body.userId) {
+        return res.status(200).json({
+            errCode: 1,
+            errMessage: "Missing required parameter!"
+        })
+    }
+    let message = await clinicAccountantServices.deleteDoctor(req.body.userId)
+    return res.status(200).json(message);
+}
 module.exports ={
     bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
     getClinicWeekSchedules:getClinicWeekSchedules,
-    createNewDoctor:createNewDoctor
+    createNewDoctor:createNewDoctor,
+    getAllDoctorOfHospital:getAllDoctorOfHospital,
+    editDoctorInfor:editDoctorInfor,
+    handleDeleteUser:handleDeleteUser,
 }

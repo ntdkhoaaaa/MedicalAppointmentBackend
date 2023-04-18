@@ -39,6 +39,7 @@ let initWebRoute = (app) => {
     router.get('/api/get-detailed-doctor-byId', doctorController.getDetailedDoctorById);
     router.get('/api/get-all-markdown', doctorController.getAllMarkdown);
     router.get('/api/get-schedule-byDate', doctorController.getScheduleByDate);
+    router.get('/api/get-schedule-byDate-contain-userId', doctorController.getScheduleByDateContainUserId);
     router.get('/api/get-selected-schedule-byId', authJwt.verifyToken, doctorController.getSelectedScheduleById)
     router.get('/api/get-extra-infor-doctor-byId', doctorController.getExtraInforDoctorById)
     router.get('/api/get-profile-doctor-byId', doctorController.getProfileDoctorById)
@@ -80,7 +81,15 @@ let initWebRoute = (app) => {
     
     router.post('/api/get-all-doctor-clinic', clinicController.getAllDoctorOfClinic);
     router.post('/api/get-clinic-week-schedules', clinicAccountantController.getClinicWeekSchedules);
+    router.post('/api/get-doctor-week-schedules', doctorController.getScheduleForWeek);
     router.post('/api/create-new-doctor', clinicAccountantController.createNewDoctor);
+    router.post('/api/get-all-doctors-hospital', clinicAccountantController.getAllDoctorOfHospital);
+    router.post('/api/edit-doctor-hospital', clinicAccountantController.editDoctorInfor);
+    router.post('/api/delete-doctor', clinicAccountantController.handleDeleteUser);
+
+    router.post('/api/create-new-clinic-doctor', clinicController.createNewDoctorForClinic);
+    router.post('/api/edit-doctor-clinic', clinicController.editDoctorClinicInfor);
+    router.post('/api/delete-doctor-clinic', clinicController.handleDeleteDoctorClinic);
 
 
     router.post('/api/update-clinic-by-id', clinicController.updateClinicbyId);

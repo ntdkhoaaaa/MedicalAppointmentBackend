@@ -59,7 +59,6 @@ let getAllMarkdown = async (req, res) => {
 }
 let bulkCreateSchedule = async (req, res) => {
     try {
-        console.log(req.body.arrSchedule)
 
         let infor = await doctorServices.bulkCreateSchedule(req.body);
         return res.status(200).json(infor)
@@ -84,6 +83,17 @@ let getSelectedScheduleById = async (req, res) => {
 let getScheduleByDate = async (req, res) => {
     try {
         let infor = await doctorServices.getScheduleByDate(req.query.doctorId, req.query.date);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
+let getScheduleByDateContainUserId = async (req, res) => {
+    try {
+        let infor = await doctorServices.getScheduleByDateContainUserId(req.query.doctorId, req.query.date,req.query.userId);
         return res.status(200).json(infor);
     } catch (e) {
         return res.status(200).json({
@@ -185,7 +195,18 @@ let getScheduleByDateFromDoctor = async (req, res) => {
     } catch (e) {
         return res.status(200).json({
             errCode: -1,
-            errMessage: 'Error from server'
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+let getScheduleForWeek = async (req, res) => {
+    try {
+        let infor = await doctorServices.getScheduleForWeek(req.body);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
         })
     }
 }
@@ -217,5 +238,7 @@ module.exports = {
     getHistoryPatient: getHistoryPatient,
     getRatingDoctor: getRatingDoctor,
     getListExaminatedPatientForDoctor: getListExaminatedPatientForDoctor,
-    getScheduleByDateFromDoctor: getScheduleByDateFromDoctor
+    getScheduleByDateFromDoctor: getScheduleByDateFromDoctor,
+    getScheduleForWeek:getScheduleForWeek,
+    getScheduleByDateContainUserId:getScheduleByDateContainUserId
 }

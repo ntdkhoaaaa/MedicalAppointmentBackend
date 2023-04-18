@@ -191,9 +191,7 @@ let AddNewSpecialtiesOfClinic = (data) => {
                     errMessage: 'Missing required parameters'
                 })
             }
-            else {
-                console.log(data.imageBase64)
-                
+            else {                
                 await db.ClinicSpecialties.create({
                     name: data.name,
                     nameEn: data.nameEn,

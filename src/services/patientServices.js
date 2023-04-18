@@ -97,9 +97,8 @@ let postVerifyBooking = (data) => {
                         },
                         raw: false,
                     })
-                    console.log('schedule', scheduleInfo)
                     if (scheduleInfo) {
-                        scheduleInfo.maxNumber = scheduleInfo.maxNumber - 1;
+                        scheduleInfo.currentNumber = scheduleInfo.currentNumber + 1;
                         await scheduleInfo.save();
                     }
                     resolve({

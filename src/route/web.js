@@ -40,6 +40,7 @@ let initWebRoute = (app) => {
     router.get('/api/get-all-markdown', doctorController.getAllMarkdown);
     router.get('/api/get-schedule-byDate', doctorController.getScheduleByDate);
     router.get('/api/get-schedule-byDate-contain-userId', doctorController.getScheduleByDateContainUserId);
+    router.get('/api/get-hospital-specialty-schedule-byDate', doctorController.getSpecialtyScheduleByDateContainUserId);
     router.get('/api/get-selected-schedule-byId', authJwt.verifyToken, doctorController.getSelectedScheduleById)
     router.get('/api/get-extra-infor-doctor-byId', doctorController.getExtraInforDoctorById)
     router.get('/api/get-profile-doctor-byId', doctorController.getProfileDoctorById)
@@ -78,6 +79,7 @@ let initWebRoute = (app) => {
     router.delete('/api/delete-medicine-by-id', clinicController.deleteMedicineById)
     router.put('/api/edit-medicine-infor', clinicController.editMedicineInfor);
     router.get('/api/get-medicine-by-Id', clinicController.getMedicineById)
+    router.get('/api/get-extra-specialty-infor-clinic', clinicController.getExtraInforSpecialtyClinic)
     
     router.post('/api/get-all-doctor-clinic', clinicController.getAllDoctorOfClinic);
     router.post('/api/get-clinic-week-schedules', clinicAccountantController.getClinicWeekSchedules);

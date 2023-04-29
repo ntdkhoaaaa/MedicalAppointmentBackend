@@ -185,7 +185,9 @@ let AddNewSpecialtiesOfClinic = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             // || !data.descriptionHTML || !data.descriptionMarkdown    
-            if (!data.name || !data.imageBase64 || !data.nameEn ||!data.clinicId) {
+            if (!data.name || !data.imageBase64 || !data.nameEn 
+                ||!data.clinicId||!data.location||!data.locationEn
+                || !data.priceId) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
@@ -198,7 +200,10 @@ let AddNewSpecialtiesOfClinic = (data) => {
                     image: data.imageBase64,
                     clinicId: data.clinicId,
                     descriptionHTML: data.descriptionHTML,
-                    descriptionMarkdown: data.descriptionMarkdown
+                    descriptionMarkdown: data.descriptionMarkdown,
+                    location:data.location,
+                    locationEn:data.locationEn,
+                    priceId: data.priceId
                 })
                 resolve({
                     errCode: 0,
@@ -263,7 +268,9 @@ let updateClinicSpecialtyData = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
             if (!data.id || !data.name || !data.imageBase64 || !data.nameEn
-                || !data.descriptionHTML || !data.descriptionMarkdown) {
+                || !data.descriptionHTML || !data.descriptionMarkdown
+                ||!data.location||!data.locationEn
+                ||!data.priceId) {
                 resolve({
                     errCode: 1,
                     errMessage: "Missing required parameters!"
@@ -278,6 +285,9 @@ let updateClinicSpecialtyData = (data) => {
                 specialty.descriptionHTML = data.descriptionHTML;
                 specialty.descriptionMarkdown = data.descriptionMarkdown;
                 specialty.image = data.imageBase64;
+                specialty.location=data.location;
+                specialty.locationEn=data.locationEn;
+                specialty.priceId=data.priceId
                 await specialty.save();
                 resolve({
                     errCode: 0,

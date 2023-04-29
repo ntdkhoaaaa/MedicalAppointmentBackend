@@ -187,6 +187,17 @@ let handleDeleteDoctorClinic = async (req, res) => {
     let message = await clinicServices.deleteDoctorClinic(req.body.userId)
     return res.status(200).json(message);
 }
+let getExtraInforSpecialtyClinic = async (req, res) => {
+    try {
+        let infor = await clinicServices.getExtraInforSpecialtyClinic(req.query.id);
+        return res.status(200).json(infor)
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
     postNewClinic: postNewClinic,
@@ -204,5 +215,6 @@ module.exports = {
     getAllDoctorOfClinic:getAllDoctorOfClinic,
     createNewDoctorForClinic:createNewDoctorForClinic,
     editDoctorClinicInfor:editDoctorClinicInfor,
-    handleDeleteDoctorClinic:handleDeleteDoctorClinic
+    handleDeleteDoctorClinic:handleDeleteDoctorClinic,
+    getExtraInforSpecialtyClinic:getExtraInforSpecialtyClinic
 }

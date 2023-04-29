@@ -16,6 +16,40 @@ let bulkCreateSchedulesForDoctors = (data) => {
         });
       } else {
         let schedule = data.arrSchedule;
+        schedule.map(item =>{
+          if(item.timetype==='TM')
+          {
+            let o1={...item}
+            o1.timetype='T1'
+            let o2={...item}
+            o2.timetype='T2'
+            let o3={...item}
+            o3.timetype='T3'
+            let o4={...item}
+            o4.timetype='T4'
+            schedule.push(o1)
+            schedule.push(o2)
+            schedule.push(o3)
+            schedule.push(o4)
+            schedule=schedule.filter(element => element!==item)
+          }
+          if(item.timetype==='TA')
+          {
+            let o1={...item}
+            o1.timetype='T5'
+            let o2={...item}
+            o2.timetype='T6'
+            let o3={...item}
+            o3.timetype='T7'
+            let o4={...item}
+            o4.timetype='T8'
+            schedule.push(o1)
+            schedule.push(o2)
+            schedule.push(o3)
+            schedule.push(o4)
+            schedule=schedule.filter(element => element!==item)
+          }
+        })
         await db.ScheduleForClinics.bulkCreate(schedule);
         resolve({
           errCode: 0,
@@ -30,33 +64,24 @@ let bulkCreateSchedulesForDoctors = (data) => {
 let getClinicWeekSchedules = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!data.currentDate || !data.clinicId) {
+      if (!data.currentDate || !data.clinicId || !data.timetype) {
         resolve({
           errCode: 1,
           errMessage: "Missing required parameters",
         });
       } else {
-        let temp = Date.now(data.currentDate);
-        let currentDate = new Date(temp);
-        currentDate.setHours(10);
-        currentDate.setMinutes(0);
-        currentDate.setMilliseconds(0);
-        let minDate = (
-          new Date(
-            currentDate.setDate(currentDate.getDate() - currentDate.getDay())
-          ).getTime() / 1000
-        ).toString();
-        let maxDate = (
-          new Date(
-            currentDate.setDate(
-              currentDate.getDate() - currentDate.getDay() + 7
-            )
-          ).getTime() / 1000
-        ).toString();
+        let minDate = moment().day(7).valueOf().toString()
+        let maxDate = moment().day(14).valueOf().toString()
+        if(data.timetype==='TM')
+        data.timetype='T1'
+        else data.timetype='T5'
+        console.log(maxDate, minDate);
+
         let result = await db.ScheduleForClinics.findAll({
           where: {
             clinicId: data.clinicId,
             date: { [Op.lte]: maxDate, [Op.gte]: minDate },
+            timetype:data.timetype
           },
           include: [{ model: db.User, attributes: [], as: "doctorData" }],
           attributes: [
@@ -64,6 +89,7 @@ let getClinicWeekSchedules = (data) => {
             "clinicId",
             "specialtyId",
             "date",
+            "timetype",
             [Sequelize.literal("`doctorData`.`email`"), "UserEmail"],
             [Sequelize.literal("`doctorData`.`firstName`"), "firstName"],
             [Sequelize.literal("`doctorData`.`lastName`"), "lastName"],
@@ -75,6 +101,7 @@ let getClinicWeekSchedules = (data) => {
           exclude: [{ model: db.User }],
           raw: true,
         });
+        console.log(result)
         if (result && result.length > 0) {
           result.map((element) => {
             element.image = new Buffer(element.image, "base64").toString(

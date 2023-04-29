@@ -2,14 +2,24 @@ import db from "../models/index";
 require('dotenv').config();
 import sendEmailSimple from './emailServices'
 import { v4 as uuidv4 } from 'uuid';
-let buildUrlEmail = (doctorId, token) => {
-    let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`
-    return result
+import moment from "moment";
+
+let buildUrlEmail = (doctorId, token,fromSpecialtyHospital) => {
+    if(!fromSpecialtyHospital)
+    {
+        let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`
+        return result
+    }
+    else{
+        let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}&fromSpecialtyHospital=${fromSpecialtyHospital}`
+        return result
+    }
+
 }
 let postBookingAppointment = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.email || !data.doctorId || !data.timetype || !data.date) {
+            if (!data.email || !data.doctorId || !data.timetype || !data.date ) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
@@ -17,48 +27,94 @@ let postBookingAppointment = (data) => {
             }
             else {
                 let token = uuidv4();
-
+                // console.log(data)
                 let user = await db.User.findOne({
                     where: {
                         email: data.email
                     }
                 });
-                if (user) {
-                    await db.Booking.create({
-                        patientId: user.id,
-                        doctorId: data.doctorId,
-                        date: data.date,
-                        timeType: data.timetype,
-                        statusId: 'S1',
-                        prognostic: data.reason,
-                        forWho: data.firstName + ' ' + data.lastName + '(' + data.forwho + ')',
-                        bookingDate: data.pickDate,
-                        patientAge: data.patientAge,
-                        gender: data.genderIdentity,
-                        token: token,
-                        phoneNumber: data.phoneNumber,
-                        address: data.address,
-                    })
-                    await sendEmailSimple.sendEmailSimple({
-                        receiverMail: data.email,
-                        patientName: data.language === 'vi' ? `${data.lastName} ${data.firstName}` : `${data.firstName} ${data.lastName}`,
-                        time: data.pickDate,
-                        language: data.language,
-                        doctorName: data.doctorName,
-                        confirmlink: buildUrlEmail(data.doctorId, token)
-                    })
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'Save patient booking success',
-                        // data: data
-                    })
-                } else {
-                    resolve({
-                        errCode: 3,
-                        errMessage: 'User not found u must to login again',
-                        // data: data
-                    })
+                if(!data.fromSpecialtyHospital)
+                {
+                    if (user) {
+                        await db.Booking.create({
+                            patientId: user.id,
+                            doctorId: data.doctorId,
+                            date: data.date,
+                            timeType: data.timetype,
+                            statusId: 'S1',
+                            prognostic: data.reason,
+                            forWho: data.firstName + ' ' + data.lastName + '(' + data.forwho + ')',
+                            bookingDate: data.pickDate,
+                            patientAge: data.patientAge,
+                            gender: data.genderIdentity,
+                            token: token,
+                            phoneNumber: data.phoneNumber,
+                            address: data.address,
+                        })
+                        await sendEmailSimple.sendEmailSimple({
+                            receiverMail: data.email,   
+                            patientName: data.language === 'vi' ? `${data.lastName} ${data.firstName}` : `${data.firstName} ${data.lastName}`,
+                            time: data.pickDate,
+                            language: data.language,
+                            doctorName: data.doctorName,
+                            confirmlink: buildUrlEmail(data.doctorId, token,data.fromSpecialtyHospital)
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Save patient booking success',
+                            // data: data
+                        })
+                    } else {
+                        resolve({
+                            errCode: 3,
+                            errMessage: 'User not found u must to login again',
+                            // data: data
+                        })
+                    }
                 }
+                else{
+                    if(user)
+                    {
+                        await db.Booking.create({
+                            patientId: user.id,
+                            doctorId: data.doctorId,
+                            date: data.date,
+                            timeType: data.timetype,
+                            statusId: 'S1',
+                            prognostic: data.reason,
+                            forWho: data.firstName + ' ' + data.lastName + '(' + data.forwho + ')',
+                            bookingDate: data.pickDate,
+                            patientAge: data.patientAge,
+                            gender: data.genderIdentity,
+                            token: token,
+                            phoneNumber: data.phoneNumber,
+                            address: data.address,
+                            clinicId: data.clinicId,
+                            specialtyId: data.specialtyId
+                        })
+                        await sendEmailSimple.sendEmailSimple({
+                            receiverMail: data.email,
+                            patientName: data.language === 'vi' ? `${data.lastName} ${data.firstName}` : `${data.firstName} ${data.lastName}`,
+                            time: data.pickDate,
+                            language: data.language,
+                            doctorName: data.doctorName,
+                            confirmlink: buildUrlEmail(data.doctorId, token,data.fromSpecialtyHospital)
+                        })
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Save patient booking success',
+                            // data: data
+                        })
+                    }else {
+                        resolve({
+                            errCode: 3,
+                            errMessage: 'User not found u must to login again',
+                            // data: data
+                        })
+                    }
+                }
+
+                
 
             }
         } catch (e) {
@@ -70,7 +126,7 @@ let postBookingAppointment = (data) => {
 let postVerifyBooking = (data) => {
     return new Promise(async (resolve, reject) => {
         try {
-            if (!data.doctorId || !data.token) {
+            if (!data.doctorId || !data.token ) {
                 resolve({
                     errCode: 1,
                     errMessage: 'Missing required parameters'
@@ -88,23 +144,44 @@ let postVerifyBooking = (data) => {
                 if (appointment) {
                     appointment.statusId = 'S2';
                     await appointment.save();
-               
-                    let scheduleInfo = await db.Schedule.findOne({
-                        where: {
-                            doctorId: data.doctorId,
-                            date: appointment.dataValues.date,
-                            timeType: appointment.dataValues.timeType,
-                        },
-                        raw: false,
-                    })
-                    if (scheduleInfo) {
-                        scheduleInfo.currentNumber = scheduleInfo.currentNumber + 1;
-                        await scheduleInfo.save();
+                    if(!data.fromSpecialtyHospital)
+                    {
+                        let scheduleInfo = await db.Schedule.findOne({
+                            where: {
+                                doctorId: data.doctorId,
+                                date: appointment.dataValues.date,
+                                timeType: appointment.dataValues.timeType,
+                            },
+                            raw: false,
+                        })
+                        if (scheduleInfo) {
+                            scheduleInfo.currentNumber = scheduleInfo.currentNumber + 1;
+                            await scheduleInfo.save();
+                        }
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Save patient booking success',
+                        })
                     }
-                    resolve({
-                        errCode: 0,
-                        errMessage: 'Save patient booking success',
-                    })
+                    else{
+                        let scheduleInfo = await db.ScheduleForClinics.findOne({
+                            where: {
+                                doctorId: data.doctorId,
+                                date: appointment.dataValues.date,
+                                timeType: appointment.dataValues.timeType,
+                            },
+                            raw: false,
+                        })
+                        console.log(scheduleInfo)
+                        if (scheduleInfo) {
+                            scheduleInfo.currentNumber = scheduleInfo.currentNumber + 1;
+                            await scheduleInfo.save();
+                        }
+                        resolve({
+                            errCode: 0,
+                            errMessage: 'Save patient booking success',
+                        })
+                    }
                 }
                 else {
                     resolve({

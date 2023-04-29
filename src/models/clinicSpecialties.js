@@ -12,6 +12,8 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             ClinicSpecialty.belongsTo(models.Clinics, { foreignKey: 'clinicId',targetKey:'id', as: 'clinicData' })
             // define association here
+            ClinicSpecialty.belongsTo(models.Allcode, { foreignKey: 'priceId', targetKey: 'keyMap', as: 'priceDataForHospital' })
+
             ClinicSpecialty.hasMany(models.Doctor_Infor, { foreignKey: 'specialtyId', as: 'ClinicSpecialtyData' })
         }
     };
@@ -21,7 +23,10 @@ module.exports = (sequelize, DataTypes) => {
         descriptionHTML: DataTypes.TEXT,
         descriptionMarkdown: DataTypes.TEXT,
         image: DataTypes.STRING,
-        clinicId: DataTypes.INTEGER
+        clinicId: DataTypes.INTEGER,
+        location: DataTypes.STRING,
+        locationEn: DataTypes.STRING,
+        priceId:DataTypes.INTEGER
     }, {
         sequelize,
         modelName: 'ClinicSpecialty',

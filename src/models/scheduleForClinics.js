@@ -21,6 +21,8 @@ module.exports = (sequelize, DataTypes) => {
             // ScheduleForClinics.belongsTo(models.Doctor_Infor, { foreignKey: 'doctorId',targetKey:'doctorId', as: 'doctorData' })
             ScheduleForClinics.belongsTo(models.Clinics, { foreignKey: 'clinicId',targetKey:'id', as: 'clinicData' })
             ScheduleForClinics.belongsTo(models.ClinicSpecialty, { foreignKey: 'specialtyId',targetKey:'id', as: 'specialtyData' })
+            // ScheduleForClinics.belongsTo(models.Allcode, { foreignKey: 'timeType', targetKey: 'keyMap', as: 'timeTypeSpecialtySchedule' })
+
         }
     };
     ScheduleForClinics.init({

@@ -709,6 +709,50 @@ let deleteDoctorClinic = (userId) => {
     });
   });
 };
+let getExtraInforSpecialtyClinic = (specialtyId) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!specialtyId) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        let data = await db.ClinicSpecialty.findOne({
+          where: {
+            id: specialtyId,
+          },
+          include:[
+            {
+              model: db.Allcode,
+              as: "priceDataForHospital",
+              attributes: ["valueEn", "valueVi"],
+            },
+          ]
+        });
+        if(data)
+        {
+          data.image=new Buffer(data.image, "base64").toString(
+            "binary"
+          );
+        }
+        if (data) {
+          resolve({
+            errCode: 0,
+            data: data,
+          });
+        } else {
+          resolve({
+            errCode: 0,
+            data: {},
+          });
+        }
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 module.exports = {
   bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
   postNewClinic: postNewClinic,
@@ -727,5 +771,6 @@ module.exports = {
   getAllDoctorOfClinic: getAllDoctorOfClinic,
   createNewDoctorForClinic:createNewDoctorForClinic,
   editDoctorClinicInfor:editDoctorClinicInfor,
-  deleteDoctorClinic:deleteDoctorClinic
+  deleteDoctorClinic:deleteDoctorClinic,
+  getExtraInforSpecialtyClinic:getExtraInforSpecialtyClinic
 };

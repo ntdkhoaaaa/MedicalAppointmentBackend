@@ -102,6 +102,17 @@ let getScheduleByDateContainUserId = async (req, res) => {
         })
     }
 }
+let getSpecialtyScheduleByDateContainUserId = async (req, res) => {
+    try {
+        let infor = await doctorServices.getSpecialtyScheduleByDateContainUserId(req.query.clinicId,req.query.specialtyId, req.query.date);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 let deleteSelectedSchedule = async (req, res) => {
     try {
         if (!req.body.id) {
@@ -240,5 +251,6 @@ module.exports = {
     getListExaminatedPatientForDoctor: getListExaminatedPatientForDoctor,
     getScheduleByDateFromDoctor: getScheduleByDateFromDoctor,
     getScheduleForWeek:getScheduleForWeek,
-    getScheduleByDateContainUserId:getScheduleByDateContainUserId
+    getScheduleByDateContainUserId:getScheduleByDateContainUserId,
+    getSpecialtyScheduleByDateContainUserId:getSpecialtyScheduleByDateContainUserId
 }

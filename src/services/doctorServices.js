@@ -2,9 +2,13 @@ import db from "../models/index";
 require("dotenv").config();
 import sendEmailSimple from "./emailServices";
 const Sequelize = require("sequelize");
+// import { Sequelize, Model, DataTypes } from 'sequelize';
+import "core-js/actual";
 
+// const sequelize = new Sequelize('sqlite::memory:');
 const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
 import _ from "lodash";
+import moment from "moment/moment";
 const { Op } = require("sequelize");
 // const  ClinicSchedules  = require('../../models/Product/order')(sequelize, DataTypes);
 let getTopDoctorHome = (limitInput) => {
@@ -375,6 +379,7 @@ let getScheduleByDate = (doctorId, date) => {
           errMessage: "Missing required parameter",
         });
       } else {
+        console.log(date);
         let doctorInfo = await db.Doctor_Infor.findOne({
           where: {
             doctorId: doctorId,
@@ -1099,10 +1104,8 @@ let getScheduleForWeek = (data) => {
           },
         });
 
-        let currentDate=new Date(data.currentDate).toLocaleString();
-
-        currentDate=new Date(currentDate)
-
+        let currentDate = new Date(data.currentDate).toLocaleString();
+        currentDate = new Date(currentDate);
         currentDate.setHours(10);
         currentDate.setMinutes(0);
         currentDate.setMilliseconds(0);
@@ -1168,7 +1171,91 @@ let getScheduleForWeek = (data) => {
     }
   });
 };
-
+let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId, date) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!clinicId && !specialtyId && !date) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameter",
+        });
+      } else {
+        let minDate=moment().valueOf()
+        let maxDate = moment().add(7,'days').valueOf()
+        let dataSchedule = await db.ScheduleForClinics.findAll({
+          where: {
+            date: { [Op.lte]: maxDate, [Op.gte]: minDate },
+            clinicId: clinicId,
+            specialtyId: specialtyId,
+          },
+          include: [
+            {
+              model: db.Allcode,
+              as: "timetypeData",
+              attributes: [],
+            },
+            {
+              model: db.User,
+              as: "doctorData",
+              attributes: [],
+            },
+          ],
+          attributes: [
+            "clinicId",
+            "doctorId",
+            "specialtyId",
+            "timetype",
+            "picked_date",
+            "date",
+            "currentNumber",
+            "maxNumber",
+            [Sequelize.literal("`doctorData`.`firstName`"), "firstName"],
+            [Sequelize.literal("`doctorData`.`lastName`"), "lastName"],
+            [Sequelize.literal("`timetypeData`.`valueEn`"), "valueEn"],
+            [Sequelize.literal("`timetypeData`.`valueVi`"), "valueVi"],
+          ],
+          group: ["date", "timetype", "doctorId"],
+          order: [["timetype", "ASC"]],
+        });
+        if (!dataSchedule) {
+          dataSchedule = [];
+          resolve({
+            errCode: 1,
+            data: [],
+          });
+        } else {
+          let temp = [...dataSchedule];
+          temp = temp.filter((item) => item.maxNumber !== item.currentNumber);
+          temp.map((item) => {
+            item.dataValues.title = new Date(item.picked_date).getDay();
+          });
+          let specialtySchedule = temp.groupBy((item) => {
+            return item.dataValues.title;
+          });
+          let arrSchedule = [];
+          for (let i = 0; i < 7; i++) {
+            if (specialtySchedule[i]) {
+              let temp = specialtySchedule[i].groupBy((item) => {
+                return item.timetype;
+              });
+              arrSchedule.push(temp);
+            } else {
+              let temp = {};
+              arrSchedule.push(temp);
+            }
+          }
+          resolve({
+            errCode: 0,
+            data: arrSchedule,
+          });
+        }
+      }
+    } catch (e) {
+      console.log(e);
+      reject(e);
+    }
+  });
+};
 module.exports = {
   getTopDoctorHome: getTopDoctorHome,
   getAllDoctors: getAllDoctors,
@@ -1189,4 +1276,6 @@ module.exports = {
   getScheduleByDateFromDoctor: getScheduleByDateFromDoctor,
   getScheduleForWeek: getScheduleForWeek,
   getScheduleByDateContainUserId: getScheduleByDateContainUserId,
+  getSpecialtyScheduleByDateContainUserId:
+    getSpecialtyScheduleByDateContainUserId,
 };

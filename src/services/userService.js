@@ -4,6 +4,8 @@ const salt = bcrypt.genSaltSync(10);
 const jwt = require("jsonwebtoken");
 import sendEmailSimple from './emailServices'
 import doctor_infor from "../models/doctor_infor";
+import { includes } from "lodash";
+const Sequelize = require("sequelize");
 
 const cookieParser = require("cookie-parser");
 let buildUrlEmail = (token) => {
@@ -106,7 +108,6 @@ let getAllUsers = (userId) => {
                             element.image = new Buffer(element.image, 'base64').toString('binary');
                         }
                     });
-                    // data.image = new Buffer(data.image, 'base64').toString('binary');
                 }
             }
             if (userId && userId !== 'ALL') {
@@ -115,7 +116,24 @@ let getAllUsers = (userId) => {
                     where: { id: userId },
                     attributes: {
                         exclude: ['password']
-                    }
+                    },
+                    include:[
+                        {
+                            model:db.UserMedicalInformation,
+                            // as:'MedicalInformation'
+                        }
+                    ],
+                    attributes: [
+                        "email",
+                        "firstName",
+                        "lastName",
+                        "phoneNumber",
+                        "address","gender","image",
+                        [Sequelize.literal("`UserMedicalInformation`.`height`"), "height"],
+                        [Sequelize.literal("`UserMedicalInformation`.`weight`"), "weight"],
+                        [Sequelize.literal("`UserMedicalInformation`.`bloodType`"), "bloodType"],
+                        [Sequelize.literal("`UserMedicalInformation`.`pathology`"), "pathology"],
+                      ],
                 })
                 if (users && users.image) {
                     users.image = new Buffer(users.image, 'base64').toString('binary');
@@ -247,12 +265,31 @@ let updateUserInforInProfile = (data) => {
             let user = await db.User.findOne({
                 where: { id: data.id },
             })
+            let userMedicalInfor=await db.UserMedicalInformation.findOne({
+                where:{patientId:data.id}
+            })
             if (user) {
                 user.address = data.address;
                 user.gender = data.gender;
                 user.phoneNumber = data.phoneNumber;
                 user.image = data.avatar;
                 await user.save();
+                if(userMedicalInfor)
+                {
+                    userMedicalInfor.height=data.height
+                    userMedicalInfor.weight=data.weight
+                    userMedicalInfor.bloodType=data.bloodType
+                    userMedicalInfor.pathology=data.pathology
+                }
+                else{
+                    await db.UserMedicalInformation.create({
+                    height:data.height,
+                    weight:data.weight,
+                    bloodType:data.bloodType,
+                    pathology:data.pathology,
+                    patientId:data.id
+                    })
+                }
                 resolve({
                     errCode: 0,
                     errMessage: 'Updated'

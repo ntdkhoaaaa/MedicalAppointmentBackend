@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
         bookingId: DataTypes.INTEGER,
         medicineRange: DataTypes.INTEGER,
         medicalRecords: DataTypes.TEXT,
+        date:DataTypes.STRING
     }, {
         sequelize,
         modelName: 'History',

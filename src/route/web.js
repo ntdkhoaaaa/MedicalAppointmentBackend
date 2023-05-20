@@ -84,6 +84,7 @@ let initWebRoute = (app) => {
     router.post('/api/get-all-doctor-clinic', clinicController.getAllDoctorOfClinic);
     router.post('/api/get-clinic-week-schedules', clinicAccountantController.getClinicWeekSchedules);
     router.post('/api/get-doctor-week-schedules', doctorController.getScheduleForWeek);
+    router.post('/api/get-doctor-specialty-week-schedules', clinicAccountantController.getSpecialtyDoctorWeeklySchedule);
     router.post('/api/create-new-doctor', clinicAccountantController.createNewDoctor);
     router.post('/api/get-all-doctors-hospital', clinicAccountantController.getAllDoctorOfHospital);
     router.post('/api/edit-doctor-hospital', clinicAccountantController.editDoctorInfor);
@@ -110,11 +111,12 @@ let initWebRoute = (app) => {
 
     router.get("/api/check-permission", authJwt.checkPermissionByToken);
     router.post('/api/refresh-token', userController.handleRefreshToken);
-
+    // router.post('/chat')
 
     //history
     router.post('/api/post-history-patient', doctorController.postHistoryPatient);
     router.get('/api/get-history-patient', doctorController.getHistoryPatient);
+    router.get('/api/get-history-patientByDate', doctorController.getHistoryPatientByDate);
 
     //rating
     router.post('/api/post-rating-patient', patientController.postRatingPatient);

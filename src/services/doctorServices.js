@@ -107,6 +107,58 @@ let getAllDoctors = (req) => {
     }
   });
 };
+let getDoctorForReview = (req) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (req.authRole === "R1") {
+        let doctors = await db.User.findAll({
+          where: { roleId: "R2" },
+          attributes: {
+            exclude: ["password"],
+          },
+        });
+        if (doctors) {
+          doctors.forEach((element) => {
+            element.image = new Buffer(element.image, "base64").toString(
+              "binary"
+            );
+          });
+          // data.image = new Buffer(data.image, 'base64').toString('binary');
+        }
+        resolve({
+          errCode: 0,
+          data: doctors,
+        });
+      } else if (req.authRole === "R2") {
+        let doctors = await db.User.findOne({
+          where: { id: req.authId },
+          attributes: {
+            exclude: ["password"],
+          },
+        });
+        if (doctors) {
+          // doctors.forEach(element => {
+          //     element.image = new Buffer(element.image, 'base64').toString('binary');
+          // });
+          doctors.image = new Buffer(doctors.image, "base64").toString(
+            "binary"
+          );
+        }
+        resolve({
+          errCode: 0,
+          data: [doctors],
+        });
+      } else {
+        resolve({
+          errCode: 0,
+          data: {},
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 let validateInputDataArray = (inputData) => {
   let arrFields = [
     "doctorId",
@@ -432,7 +484,6 @@ let getScheduleByDateContainUserId = (doctorId, date, userId) => {
             doctorId: doctorId,
           },
         });
-        console.log("doctorInfo", doctorInfo);
         let userScheduleForDate = await db.Booking.findAll({
           where: {
             patientId: userId,
@@ -495,22 +546,20 @@ let getScheduleByDateContainUserId = (doctorId, date, userId) => {
             ],
           });
           if (!dataSchedule) dataSchedule = [];
-          //   dataSchedule.map((element)=>{(
-          //      {...element,Active :"true"}
-
-          //   )
           for (const element of dataSchedule) {
             let check = userScheduleForDate.find(
               (e) => e.timeType === element.timetype
             );
             if (check && check.id !== null) {
-              element.dataValues.bookedByThisUser = true;
+              if(element.currentNumber===doctorInfo.count)
+              {
+                element.dataValues.bookedButFull=true
+              }
+               else element.dataValues.bookedByThisUser = true;
             } else {
               element.dataValues.bookedByThisUser = false;
             }
           }
-
-          console.log(dataSchedule);
           resolve({
             errCode: 0,
             data: dataSchedule,
@@ -602,7 +651,7 @@ let getExtraInforDoctorById = (doctorId) => {
     }
   });
 };
-let getProfileDoctorById = (doctorId) => {
+let getProfileDoctorById = (doctorId, checkModal) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (!doctorId) {
@@ -611,63 +660,130 @@ let getProfileDoctorById = (doctorId) => {
           errMessage: "Missing required parameter",
         });
       } else {
-        let data = await db.User.findOne({
-          where: {
-            id: doctorId,
-          },
-          attributes: {
-            exclude: ["password"],
-          },
-          include: [
-            {
-              model: db.Markdown,
-              attributes: ["description"],
+        if (checkModal === false) {
+          let data = await db.User.findOne({
+            where: {
+              id: doctorId,
             },
-            {
-              model: db.Allcode,
-              as: "positionData",
-              attributes: ["valueEn", "valueVi"],
+            attributes: {
+              exclude: ["password"],
             },
-            {
-              model: db.Doctor_Infor,
-              attributes: {
-                exclude: ["id", "doctorId"],
+            include: [
+              {
+                model: db.Markdown,
+                attributes: ["description"],
               },
-              include: [
-                {
-                  model: db.Allcode,
-                  as: "priceData",
-                  attributes: ["valueEn", "valueVi"],
+              {
+                model: db.Allcode,
+                as: "positionData",
+                attributes: ["valueEn", "valueVi"],
+              },
+              {
+                model: db.Doctor_Infor,
+                attributes: {
+                  exclude: ["id", "doctorId"],
                 },
-                {
-                  model: db.Allcode,
-                  as: "paymentData",
-                  attributes: ["valueEn", "valueVi"],
-                },
-                {
-                  model: db.Allcode,
-                  as: "provinceData",
-                  attributes: ["valueEn", "valueVi"],
-                },
-              ],
+                include: [
+                  {
+                    model: db.Allcode,
+                    as: "priceData",
+                    attributes: ["valueEn", "valueVi"],
+                  },
+                  {
+                    model: db.Allcode,
+                    as: "paymentData",
+                    attributes: ["valueEn", "valueVi"],
+                  },
+                  {
+                    model: db.Allcode,
+                    as: "provinceData",
+                    attributes: ["valueEn", "valueVi"],
+                  },
+                ],
+              },
+            ],
+            raw: false,
+            nest: true,
+          });
+          if (data) {
+            if (data.image) {
+              data.image = new Buffer(data.image, "base64").toString("binary");
+            }
+          } else data = {};
+          resolve({
+            errCode: 0,
+            data: data,
+          });
+        } else {
+          console.log("checkModal", checkModal);
+          let doctors = await db.User.findOne({
+            where: { id: doctorId },
+            attributes: {
+              exclude: ["password"],
+              
             },
-          ],
-          raw: false,
-          nest: true,
-        });
-        if (data) {
-          if (data.image) {
-            data.image = new Buffer(data.image, "base64").toString("binary");
+            include:[
+              {
+                model: db.Allcode,
+                as: "positionData",
+                attributes: ["valueEn", "valueVi"],
+              },
+              {
+                model: db.Doctor_Infor,
+                attributes: ["addressClinic", "nameClinic", "nameSpecialty"],
+              },
+              {
+                model: db.Doctor_Clinic_Specialty,
+                attributes: ["clinicId", "specialtyId"],
+                include: [
+                  {
+                    model: db.ClinicSpecialty,
+                    attributes: ["location", "name"],
+                    as: "specialtyData",
+                  },
+                ],
+              },
+            ]
+          });
+          if (doctors) {
+            // doctors.forEach(element => {
+            //     element.image = new Buffer(element.image, 'base64').toString('binary');
+            // });
+            doctors.image = new Buffer(doctors.image, "base64").toString(
+              "binary"
+            );
           }
-        } else data = {};
-        // if (data && data.image) {
-        //     data.image = new Buffer(data.image, 'base64').toString('binary');
-        // }
-        // if (!data) data = {}
-        resolve({
-          errCode: 0,
-          data: data,
-        });
+          // let data = await db.User.findOne({
+          //   where: {
+          //     id: doctorId,
+          //   },
+          //   // attributes: {
+          //   //   exclude: ["password","address","email","gender"],
+          //   // },
+          //   // include: [
+          //   //   {
+          //   //     model: db.Allcode,
+          //   //     as: "positionData",
+          //   //     attributes: ["valueEn", "valueVi"],
+          //   //   },
+          //   // ],
+          //   // raw: false,
+          //   // nest: true,
+          // });
+          // if (data) {
+          //   if (data.image) {
+          //     data.image = new Buffer(data.image, "base64").toString("binary");
+          //   }
+          // } else data = {};
+          // if (data && data.image) {
+          //     data.image = new Buffer(data.image, 'base64').toString('binary');
+          // }
+          // if (!data) data = {}
+          resolve({
+            errCode: 0,
+            data: doctors,
+          });
+        }
       }
     } catch (e) {
       reject(e);
@@ -690,7 +806,6 @@ let getListPatientForDoctor = (doctorId, date) => {
             date: date,
           },
         });
-
         resolve({
           errCode: 0,
           data: dataBooking,
@@ -756,10 +871,12 @@ let postHistoryPatient = (data) => {
           ],
         });
         if (bookinginfo) {
+          console.log(data);
           await db.History.create({
             bookingId: data.bookingId,
             medicalRecords: data.medicalRecords,
             medicineRange: data.medicineRange,
+            date: data.date,
           }).then(async function (x) {
             let dataReceipt = data.receipts.map((item) => {
               item.historyId = x.id;
@@ -813,48 +930,67 @@ let getHistoryPatient = (data) => {
           errMessage: "Missing required parameters",
         });
       } else {
-        // let bookinginfo = await db.Booking.findOne({
-        //     where: {
-        //         id: data
-        //     },
-        //     include: [
-        //         {
-        //             model: db.History,
-        //             include: [{
-        //                 model: db.Receipt,
-        //                 as: 'receiptData',
-        //             }]
-        //         },
-        //         {
-        //             model: db.User,
-        //             as: 'doctorInfoData',
-        //             attributes: ['email', 'firstName', 'lastName', 'image'],
-        //             include: [{
-        //                 model: db.Doctor_Infor,
-        //                 attributes: {
-        //                     exclude: ['id', 'doctorId']
-        //                 },
-        //             }]
-        //         }
-        //     ]
-        // })
-        // if (bookinginfo) {
-        //     resolve({
-        //         errCode: 0,
-        //         historyInfo: bookinginfo
-
-        //     })
-        // }
-        // else {
-        //     resolve({
-        //         errCode: 1,
-        //         errMessage: 'booking notfound',
-
-        //     })
-        // }
         let historyInfo = await db.History.findOne({
           where: {
             bookingId: data,
+          },
+          include: [
+            {
+              model: db.Receipt,
+              as: "receiptData",
+              attributes: {
+                exclude: ["id", "historyId"],
+              },
+            },
+            // {
+            //   model: db.Booking,
+            //   attributes: ["doctorId"],
+            //   include: [
+            //     {
+            //       model: db.User,
+            //       as: "doctorInfoData",
+            //       attributes: ["email", "firstName", "lastName", "image", "id"],
+            //         {
+            //           model: db.Doctor_Infor,
+            //           attributes: {
+            //             exclude: ["id", "doctorId"],
+            //           },
+            //         },
+            //       ],
+            //     },
+            //   ],
+            // },
+          ],
+        });
+        if (historyInfo) {
+          resolve({
+            errCode: 0,
+            historyInfo: historyInfo,
+          });
+        } else {
+          resolve({
+            errCode: 1,
+            errMessage: "booking notfound",
+          });
+        }
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
+let getHistoryPatientByDate = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        let historyInfo = await db.History.findAll({
+          where: {
+            date: data,
           },
           include: [
             {
@@ -885,10 +1021,11 @@ let getHistoryPatient = (data) => {
             },
           ],
         });
+        console.log(historyInfo);
         if (historyInfo) {
           resolve({
             errCode: 0,
-            historyInfo: historyInfo,
+            data: historyInfo,
           });
         } else {
           resolve({
@@ -902,7 +1039,6 @@ let getHistoryPatient = (data) => {
     }
   });
 };
-
 let getRatingDoctor = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -1103,28 +1239,16 @@ let getScheduleForWeek = (data) => {
             doctorId: data.doctorId,
           },
         });
-
-        let currentDate = new Date(data.currentDate).toLocaleString();
-        currentDate = new Date(currentDate);
-        currentDate.setHours(10);
-        currentDate.setMinutes(0);
-        currentDate.setMilliseconds(0);
-        let minDate = (
-          new Date(
-            currentDate.setDate(currentDate.getDate() - currentDate.getDay())
-          ).getTime() / 1000
-        ).toString();
-        let maxDate = (
-          new Date(
-            currentDate.setDate(
-              currentDate.getDate() - currentDate.getDay() + 7
-            )
-          ).getTime() / 1000
-        ).toString();
+        let minDate = moment(data.currentDate)
+          .startOf("days")
+          .isoWeekday(0)
+          .valueOf()
+          .toString(); 
+        let maxDate = moment(data.currentDate).endOf("days").isoWeekday(7).valueOf().toString();
         let result = await db.Schedule.findAll({
           where: {
             doctorId: data.doctorId,
-            date: { [Op.lte]: maxDate, [Op.gte]: minDate },
+            date: { [Op.lt]: maxDate, [Op.gt]: minDate },
           },
           include: [
             {
@@ -1180,8 +1304,8 @@ let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId, date) => {
           errMessage: "Missing required parameter",
         });
       } else {
-        let minDate=moment().valueOf()
-        let maxDate = moment().add(7,'days').valueOf()
+        let minDate = moment().valueOf();
+        let maxDate = moment().add(7, "days").valueOf();
         let dataSchedule = await db.ScheduleForClinics.findAll({
           where: {
             date: { [Op.lte]: maxDate, [Op.gte]: minDate },
@@ -1278,4 +1402,5 @@ module.exports = {
   getScheduleByDateContainUserId: getScheduleByDateContainUserId,
   getSpecialtyScheduleByDateContainUserId:
     getSpecialtyScheduleByDateContainUserId,
+  getHistoryPatientByDate: getHistoryPatientByDate,
 };

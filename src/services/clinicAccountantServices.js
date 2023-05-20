@@ -64,23 +64,24 @@ let bulkCreateSchedulesForDoctors = (data) => {
 let getClinicWeekSchedules = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!data.currentDate || !data.clinicId || !data.timetype) {
+      if ( !data.clinicId || !data.timetype) {
         resolve({
           errCode: 1,
           errMessage: "Missing required parameters",
         });
       } else {
-        let minDate = moment().day(7).valueOf().toString()
-        let maxDate = moment().day(14).valueOf().toString()
+
+        let minDate = moment(new Date()).isoWeekday(7).startOf('days').valueOf().toString()
+        let maxDate = moment(new Date()).isoWeekday(14).endOf('days').valueOf().toString()
+        console.log('minDate: ' + minDate + ' maxDate: ' + maxDate)
+
         if(data.timetype==='TM')
         data.timetype='T1'
         else data.timetype='T5'
-        console.log(maxDate, minDate);
-
         let result = await db.ScheduleForClinics.findAll({
           where: {
             clinicId: data.clinicId,
-            date: { [Op.lte]: maxDate, [Op.gte]: minDate },
+            date: { [Op.lt]: maxDate, [Op.gt]: minDate },
             timetype:data.timetype
           },
           include: [{ model: db.User, attributes: [], as: "doctorData" }],
@@ -101,7 +102,6 @@ let getClinicWeekSchedules = (data) => {
           exclude: [{ model: db.User }],
           raw: true,
         });
-        console.log(result)
         if (result && result.length > 0) {
           result.map((element) => {
             element.image = new Buffer(element.image, "base64").toString(
@@ -360,6 +360,72 @@ let deleteDoctor = (userId) => {
     });
   });
 };
+let getSpecialtyDoctorWeeklySchedule = (data) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!data.currentDate || !data.doctorId) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        let doctorInfo = await db.Doctor_Clinic_Specialty.findOne({
+          where: {
+            doctorId: data.doctorId,
+          },
+        });
+        let minDate=moment(data.currentDate).startOf('days').isoWeekday(0).valueOf().toString()
+        let maxDate=moment(data.currentDate).endOf('days').isoWeekday(7).valueOf().toString()
+        let result = await db.ScheduleForClinics.findAll({
+          where: {
+            doctorId: data.doctorId,
+            date: { [Op.lt]: maxDate, [Op.gt]: minDate },
+          },
+          include: [
+            {
+              model: db.Allcode,
+              as: "timetypeData",
+              attributes: [],
+            },
+          ],
+          attributes: [
+            "id",
+            "currentNumber",
+            "maxNumber",
+            "date",
+            "doctorId",
+            "timetype",
+            "picked_date",
+            [Sequelize.literal("`timetypeData`.`valueEn`"), "valueEn"],
+            [Sequelize.literal("`timetypeData`.`valueVi`"), "valueVi"],
+          ],
+          raw: true,
+        });
+        result.map((item) => {
+          if (item.currentNumber === 0) {
+            item.isBooked = false;
+            item.isFullAppointment = false;
+          } else {
+            if (item.currentNumber < doctorInfo.count) {
+              item.isBooked = true;
+              item.isFullAppointment = false;
+            } else {
+              item.isBooked = false;
+              item.isFullAppointment = true;
+            }
+          }
+        });
+        resolve({
+          errCode: 0,
+          errMessage: "OKK",
+          data: result,
+        });
+      }
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 module.exports = {
   bulkCreateSchedulesForDoctors: bulkCreateSchedulesForDoctors,
   getClinicWeekSchedules: getClinicWeekSchedules,
@@ -367,4 +433,5 @@ module.exports = {
   getAllDoctorOfHospital: getAllDoctorOfHospital,
   editDoctorInfor: editDoctorInfor,
   deleteDoctor: deleteDoctor,
+  getSpecialtyDoctorWeeklySchedule:getSpecialtyDoctorWeeklySchedule
 };

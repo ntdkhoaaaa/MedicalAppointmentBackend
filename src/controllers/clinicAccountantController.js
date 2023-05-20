@@ -65,6 +65,17 @@ let handleDeleteUser = async (req, res) => {
     let message = await clinicAccountantServices.deleteDoctor(req.body.userId)
     return res.status(200).json(message);
 }
+let getSpecialtyDoctorWeeklySchedule = async (req, res) => {
+    try {
+        let infor = await clinicAccountantServices.getSpecialtyDoctorWeeklySchedule(req.body);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
 module.exports ={
     bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
     getClinicWeekSchedules:getClinicWeekSchedules,
@@ -72,4 +83,5 @@ module.exports ={
     getAllDoctorOfHospital:getAllDoctorOfHospital,
     editDoctorInfor:editDoctorInfor,
     handleDeleteUser:handleDeleteUser,
+    getSpecialtyDoctorWeeklySchedule:getSpecialtyDoctorWeeklySchedule
 }

@@ -1,6 +1,7 @@
 import _ from 'lodash';
 const jwt = require("jsonwebtoken");
 import db from "../models/index";
+const Sequelize = require("sequelize");
 
 let verifyToken = (req, res, next) => {
     try {
@@ -52,15 +53,32 @@ let checkPermissionByToken = async (req, res) => {
             }
             else {
                 let data = await db.User.findOne({
-                    attributes: ['email', 'roleId', 'password', 'firstName', 'lastName', 'id','clinicId','phoneNumber','address','gender'],
-
+                   
                     where: { id: decoded.id },
                     include:[
                         {
                             model:db.Doctor_Infor,
                             attributes:['clinicId']
-                        }
+                        },
+                        {
+                            model: db.UserMedicalInformation,
+                            // attributes:["*"]
+                          }
                     ],
+                    attributes: ['email', 'roleId', 'password', 
+                    'firstName', 'lastName', 'id','clinicId','phoneNumber','address','gender',
+                    [Sequelize.literal("`UserMedicalInformation`.`height`"), "height"],
+                    [Sequelize.literal("`UserMedicalInformation`.`weight`"), "weight"],
+                    [
+                      Sequelize.literal("`UserMedicalInformation`.`bloodType`"),
+                      "bloodType",
+                    ],
+                    [
+                      Sequelize.literal("`UserMedicalInformation`.`pathology`"),
+                      "pathology",
+                    ],
+                ],
+
                     raw: true,
                     nest: true
                 });

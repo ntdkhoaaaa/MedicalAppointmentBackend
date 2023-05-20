@@ -33,7 +33,11 @@ module.exports = (sequelize, DataTypes) => {
         token: DataTypes.STRING,
         phoneNumber: DataTypes.STRING,
         clinicId: DataTypes.INTEGER,
-        specialtyId: DataTypes.INTEGER
+        specialtyId: DataTypes.INTEGER,
+        pathology: DataTypes.STRING,
+        bloodType: DataTypes.STRING,
+        weight: DataTypes.STRING,
+        height: DataTypes.STRING,
     }, {
         sequelize,
         modelName: 'Booking',

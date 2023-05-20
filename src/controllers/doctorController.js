@@ -21,7 +21,6 @@ let getAllDoctors = async (req, res) => {
             errCode: -1,
             message: 'Error from server'
         })
-
     }
 }
 let postInforDoctors = async (req, res) => {
@@ -143,7 +142,7 @@ let getExtraInforDoctorById = async (req, res) => {
 }
 let getProfileDoctorById = async (req, res) => {
     try {
-        let infor = await doctorServices.getProfileDoctorById(req.query.doctorId);
+        let infor = await doctorServices.getProfileDoctorById(req.query.doctorId,req.query.checkModal);
         return res.status(200).json(infor);
     } catch (e) {
         return res.status(200).json({
@@ -183,6 +182,18 @@ let getHistoryPatient = async (req, res) => {
         return res.status(200).json({
             errCode: -1,
             errMessage: 'Error from server'
+        })
+    }
+}
+let getHistoryPatientByDate = async (req, res) => {
+    try {
+        console.log(req.query.date)
+        let infor = await doctorServices.getHistoryPatientByDate(req.query.date);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
         })
     }
 }
@@ -252,5 +263,6 @@ module.exports = {
     getScheduleByDateFromDoctor: getScheduleByDateFromDoctor,
     getScheduleForWeek:getScheduleForWeek,
     getScheduleByDateContainUserId:getScheduleByDateContainUserId,
-    getSpecialtyScheduleByDateContainUserId:getSpecialtyScheduleByDateContainUserId
+    getSpecialtyScheduleByDateContainUserId:getSpecialtyScheduleByDateContainUserId,
+    getHistoryPatientByDate:getHistoryPatientByDate
 }

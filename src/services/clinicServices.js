@@ -187,7 +187,7 @@ let deleteClinicById = (id) => {
     }
   });
 };
-let checkMedicineCode = (medicineCode) => {
+let checkMedicineCode = (medicineCode,clinicId) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (!medicineCode) {
@@ -198,6 +198,7 @@ let checkMedicineCode = (medicineCode) => {
       } else {
         let data = await db.Medicine.findOne({
           where: {
+            clinicId:clinicId,
             medicineCode: medicineCode,
           },
         });
@@ -221,38 +222,83 @@ let checkMedicineCode = (medicineCode) => {
 let warningDuplicateMedicine = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!data) {
+      if (!data.medicineArr || !data.clinicId) {
         resolve({
           errCode: 1,
           errMessage: "Missing required parameters",
         });
       } else {
-        let arrMedicine = data;
-        let warningDuplicateMedicine = new Array();
-        if (arrMedicine) {
-          for (const medicine of arrMedicine) {
-            let res = await checkMedicineCode(medicine.medicineCode);
+        if(data.medicineArr[0].id)
+        {
+          console.log(data.medicineArr[0].id)
+          let checker = await db.Medicine.findOne({
+            where: {
+              id:data.medicineArr[0].id
+            },
+          });
+          console.log(checker.medicineCode,data.medicineArr[0].medicineCode)
+
+          if(checker.medicineCode===data.medicineArr[0].medicineCode)
+          {
+            console.log(data.medicineArr[0].medicineCode)
+            resolve({
+              errCode: 0,
+              data: {
+                result: false,
+              },
+            });
+          }
+          else{
+            let res = await checkMedicineCode(data.medicineArr[0].medicineCode,data.clinicId);
+            console.log('alooo',res)
+
             if (res && res.result === true) {
-              warningDuplicateMedicine.push(medicine.medicineCode);
+              resolve({
+                errCode: 0,
+                data: {
+                  result: true,
+                },
+              });
+            }
+            else{
+              resolve({
+                errCode: 0,
+                data: {
+                  result: false,
+                },
+              });
             }
           }
         }
-        if (warningDuplicateMedicine.length > 0) {
-          resolve({
-            errCode: 0,
-            data: {
-              result: true,
-              warningDuplicateMedicine: warningDuplicateMedicine,
-            },
-          });
-        } else {
-          resolve({
-            errCode: 0,
-            data: {
-              result: false,
-            },
-          });
+        else{
+          let arrMedicine = data.medicineArr;
+          let warningDuplicateMedicine = new Array();
+          if (arrMedicine) {
+            for (const medicine of arrMedicine) {
+              let res = await checkMedicineCode(medicine.medicineCode,data.clinicId);
+              if (res && res.result === true) {
+                warningDuplicateMedicine.push(medicine.medicineCode);
+              }
+            }
+          }
+          if (warningDuplicateMedicine.length > 0) {
+            resolve({
+              errCode: 0,
+              data: {
+                result: true,
+                warningDuplicateMedicine: warningDuplicateMedicine,
+              },
+            });
+          } else {
+            resolve({
+              errCode: 0,
+              data: {
+                result: false,
+              },
+            });
+          }
         }
+
       }
     } catch (e) {
       reject(e);

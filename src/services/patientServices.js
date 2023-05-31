@@ -4,6 +4,7 @@ import sendEmailSimple from "./emailServices";
 import { v4 as uuidv4 } from "uuid";
 import moment from "moment";
 
+
 let buildUrlEmail = (doctorId, token, fromSpecialtyHospital) => {
   if (!fromSpecialtyHospital) {
     let result = `${process.env.URL_REACT}/verify-booking?token=${token}&doctorId=${doctorId}`;
@@ -16,7 +17,14 @@ let buildUrlEmail = (doctorId, token, fromSpecialtyHospital) => {
 let postBookingAppointment = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if (!data.email || !data.doctorId || !data.timetype || !data.date) {
+      if (!data.email
+         || !data.doctorId 
+         || !data.timetype
+          || !data.date
+          || !data.reason
+
+          ) {
+          
         resolve({
           errCode: 1,
           errMessage: "Missing required parameters",

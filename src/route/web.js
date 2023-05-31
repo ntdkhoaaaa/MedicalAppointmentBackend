@@ -45,6 +45,7 @@ let initWebRoute = (app) => {
     router.get('/api/get-extra-infor-doctor-byId', doctorController.getExtraInforDoctorById)
     router.get('/api/get-profile-doctor-byId', doctorController.getProfileDoctorById)
     router.get('/api/get-list-patient-for-doctor', doctorController.getListPatientForDoctor)
+    router.get('/api/get-list-patient-for-doctor-withtimeType', doctorController.getListPatientForDoctorWithTimeType);
 
     router.post('/api/bulk-create-schedule', doctorController.bulkCreateSchedule);
     router.post('/api/save-infor-doctors', doctorController.postInforDoctors);
@@ -85,6 +86,7 @@ let initWebRoute = (app) => {
     router.post('/api/get-clinic-week-schedules', clinicAccountantController.getClinicWeekSchedules);
     router.post('/api/get-doctor-week-schedules', doctorController.getScheduleForWeek);
     router.post('/api/get-doctor-specialty-week-schedules', clinicAccountantController.getSpecialtyDoctorWeeklySchedule);
+    router.post('/api/get-booking-appointment-from-hospital', clinicAccountantController.getBookingScheduleByDateFromHospital);
     router.post('/api/create-new-doctor', clinicAccountantController.createNewDoctor);
     router.post('/api/get-all-doctors-hospital', clinicAccountantController.getAllDoctorOfHospital);
     router.post('/api/edit-doctor-hospital', clinicAccountantController.editDoctorInfor);

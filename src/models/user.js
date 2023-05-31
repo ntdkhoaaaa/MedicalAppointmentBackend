@@ -34,10 +34,10 @@ module.exports = (sequelize, DataTypes) => {
     image: DataTypes.STRING,
     roleId: DataTypes.STRING,
     positionId: DataTypes.STRING,
-    statusId: DataTypes.STRING,
     clinicId:DataTypes.INTEGER
   }, {
     sequelize,
+    freezeTableName:true,
     modelName: 'User',
   });
   return User;

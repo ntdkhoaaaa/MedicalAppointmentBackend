@@ -22,16 +22,18 @@ let handleUserLogin = (email, password) => {
       let userData = {};
       let isExist = await checkUserEmail(email);
       if (isExist) {
+        let userMedicalInfor = await db.UserMedicalInformation.findOne({
+          where: {
+            patientId: 4,
+          },
+        });
+        console.log("userMedicalInformation", userMedicalInfor);
         let user = await db.User.findOne({
           where: { email: email },
           include: [
             {
-              model: db.Doctor_Infor,
-              attributes: ["clinicId"],
-            },
-            {
               model: db.UserMedicalInformation,
-            //   attributes:["*"]
+              attributes: [],
             },
           ],
           attributes: [
@@ -45,14 +47,16 @@ let handleUserLogin = (email, password) => {
             "address",
             "gender",
             "clinicId",
-            [Sequelize.literal("`UserMedicalInformation`.`height`"), "height"],
-            [Sequelize.literal("`UserMedicalInformation`.`weight`"), "weight"],
+            [Sequelize.literal('"UserMedicalInformation"."height"'), "height"],
+            [Sequelize.literal('"UserMedicalInformation"."weight"'), "weight"],
             [
-              Sequelize.literal("`UserMedicalInformation`.`bloodType`"),
+              Sequelize.literal('"UserMedicalInformation"."bloodType"'),
               "bloodType",
             ],
             [
-              Sequelize.literal("`UserMedicalInformation`.`pathology`"),
+              Sequelize.literal(
+                `replace("UserMedicalInformation"."pathology",'\\n', E'\\n')`
+              ),
               "pathology",
             ],
           ],
@@ -60,6 +64,7 @@ let handleUserLogin = (email, password) => {
           nest: true,
           raw: true,
         });
+        console.log("check userMedical", user);
         if (user) {
           let check = await bcrypt.compareSync(password, user.password);
           if (check) {
@@ -100,6 +105,7 @@ let handleUserLogin = (email, password) => {
         userData.errMessage =
           "Your Email is not exist in this system. Please try again";
       }
+      console.log("?????");
       resolve(userData);
     } catch (e) {
       reject(e);
@@ -113,6 +119,7 @@ let checkUserEmail = (userEmail) => {
       let user = await db.User.findOne({
         where: { email: userEmail },
       });
+      console.log(user);
       if (user) {
         resolve(true);
       } else {
@@ -152,6 +159,7 @@ let getAllUsers = (userId) => {
           include: [
             {
               model: db.UserMedicalInformation,
+              attributes: [],
             },
           ],
           attributes: [
@@ -162,14 +170,16 @@ let getAllUsers = (userId) => {
             "address",
             "gender",
             "image",
-            [Sequelize.literal("`UserMedicalInformation`.`height`"), "height"],
-            [Sequelize.literal("`UserMedicalInformation`.`weight`"), "weight"],
+            [Sequelize.literal('"UserMedicalInformation"."height"'), "height"],
+            [Sequelize.literal('"UserMedicalInformation"."weight"'), "weight"],
             [
-              Sequelize.literal("`UserMedicalInformation`.`bloodType`"),
+              Sequelize.literal('"UserMedicalInformation"."bloodType"'),
               "bloodType",
             ],
             [
-              Sequelize.literal("`UserMedicalInformation`.`pathology`"),
+              Sequelize.literal(
+                `replace("UserMedicalInformation"."pathology",'\\n', E'\\n')`
+              ),
               "pathology",
             ],
           ],
@@ -206,7 +216,6 @@ let createNewUser = (data) => {
           roleId: data.roleId,
           positionId: data.positionId,
           image: data.avatar,
-          statusId: data.statusId,
           clinicId: data.clinicId,
         });
         resolve({
@@ -314,7 +323,7 @@ let updateUserInforInProfile = (data) => {
           userMedicalInfor.weight = data.weight;
           userMedicalInfor.bloodType = data.bloodType;
           userMedicalInfor.pathology = data.pathology;
-          await userMedicalInfor.save()
+          await userMedicalInfor.save();
         } else {
           await db.UserMedicalInformation.create({
             height: data.height,
@@ -352,6 +361,7 @@ let getAllCodeService = (typeInput) => {
         let allCode = await db.Allcode.findAll({
           where: { type: typeInput },
         });
+
         res.errCode = 0;
         res.data = allCode;
         resolve(res);
@@ -404,6 +414,7 @@ let handleRegister = (data) => {
 let handleRefreshToken = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
+      console.log('la sao di ha',data)
       let info = await db.Refresh_Token.findOne({
         attributes: ["userId", "refreshToken"],
         where: { refreshToken: data.refreshToken },
@@ -425,6 +436,7 @@ let handleRefreshToken = (data) => {
         nest: true,
         raw: false,
       });
+      console.log('infor checker',info);
       if (info) {
         let tokenAccess = jwt.sign(
           { id: info.User.id, roleId: info.User.roleId },

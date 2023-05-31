@@ -11,10 +11,19 @@ let handleLogin = async (req, res) => {
     let email = req.body.email;
     let password = req.body.password;
     if (!email || !password) {
-        return res.status(500).json({
-            errCode: 1,
-            message: 'Missing inputs parameter!'
-        })
+        if(!email)
+        {
+            return res.status(500).json({
+                errCode: 1,
+                message: 'Nhập thiếu thông tin email'
+            })
+        }
+        else {
+            return res.status(500).json({
+                errCode: 1,
+                message: 'Nhập thiếu thông tin mật khẩu'
+            })
+        }
     }
     let userData = await userService.handleUserLogin(email, password);
     res.status(200).json(

@@ -76,6 +76,17 @@ let getSpecialtyDoctorWeeklySchedule = async (req, res) => {
         })
     }
 }
+let getBookingScheduleByDateFromHospital = async (req, res) => {
+    try {
+        let infor = await clinicAccountantServices.getBookingScheduleByDateFromHospital(req.body.hospitalId,req.body.date);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
 module.exports ={
     bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
     getClinicWeekSchedules:getClinicWeekSchedules,
@@ -83,5 +94,6 @@ module.exports ={
     getAllDoctorOfHospital:getAllDoctorOfHospital,
     editDoctorInfor:editDoctorInfor,
     handleDeleteUser:handleDeleteUser,
-    getSpecialtyDoctorWeeklySchedule:getSpecialtyDoctorWeeklySchedule
+    getSpecialtyDoctorWeeklySchedule:getSpecialtyDoctorWeeklySchedule,
+    getBookingScheduleByDateFromHospital:getBookingScheduleByDateFromHospital
 }

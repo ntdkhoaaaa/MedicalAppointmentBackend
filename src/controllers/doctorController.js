@@ -243,6 +243,17 @@ let getListExaminatedPatientForDoctor = async (req, res) => {
         })
     }
 }
+let getListPatientForDoctorWithTimeType = async (req, res) => {
+    try {
+        let infor = await doctorServices.getListPatientForDoctorWithTimeType(req.query.doctorId, req.query.date,req.query.timeType);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'
+        })
+    }
+}
 module.exports = {
     getTopDoctorHome: getTopDoctorHome,
     getAllDoctors: getAllDoctors,
@@ -264,5 +275,6 @@ module.exports = {
     getScheduleForWeek:getScheduleForWeek,
     getScheduleByDateContainUserId:getScheduleByDateContainUserId,
     getSpecialtyScheduleByDateContainUserId:getSpecialtyScheduleByDateContainUserId,
-    getHistoryPatientByDate:getHistoryPatientByDate
+    getHistoryPatientByDate:getHistoryPatientByDate,
+    getListPatientForDoctorWithTimeType:getListPatientForDoctorWithTimeType
 }

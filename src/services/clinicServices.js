@@ -510,15 +510,15 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
           },
           include: [{ model: db.User, attributes: [] }],
           attributes: [
-            [Sequelize.literal("`User`.`email`"), "UserEmail"],
-            [Sequelize.literal("`User`.`firstName`"), "firstName"],
-            [Sequelize.literal("`User`.`lastName`"), "lastName"],
-            [Sequelize.literal("`User`.`address`"), "address"],
-            [Sequelize.literal("`User`.`phoneNumber`"), "phoneNumber"],
-            [Sequelize.literal("`User`.`image`"), "image"],
-            [Sequelize.literal("`User`.`positionId`"), "positionId"],
-            [Sequelize.literal("`User`.`gender`"), "gender"],
-            [Sequelize.literal("`User`.`id`"), "id"],
+            [Sequelize.literal('"User"."email"'), "UserEmail"],
+            [Sequelize.literal('"User"."firstName"'), "firstName"],
+            [Sequelize.literal('"User"."lastName"'), "lastName"],
+            [Sequelize.literal('"User"."address"'), "address"],
+            [Sequelize.literal('"User"."phoneNumber"'), "phoneNumber"],
+            [Sequelize.literal('"User"."image"'), "image"],
+            [Sequelize.literal('"User"."positionId"'), "positionId"],
+            [Sequelize.literal('"User"."gender"'), "gender"],
+            [Sequelize.literal('"User"."id"'), "id"],
             "clinicId",
             "nameSpecialty",
             "specialtyId",
@@ -529,8 +529,8 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
           ],
           exclude: [{ model: db.User }],
           raw: true,
-          // nest: true,
         });
+        console.log('data',data)
         if (specialtyCode !== "All") {
           if (data && data.length > 0) {
             data = data.filter((element) => {

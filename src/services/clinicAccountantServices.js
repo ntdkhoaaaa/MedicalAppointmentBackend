@@ -16,41 +16,40 @@ let bulkCreateSchedulesForDoctors = (data) => {
         });
       } else {
         let schedule = data.arrSchedule;
-        schedule.map(item =>{
-          if(item.timetype==='TM')
-          {
-            let o1={...item}
-            o1.timetype='T1'
-            let o2={...item}
-            o2.timetype='T2'
-            let o3={...item}
-            o3.timetype='T3'
-            let o4={...item}
-            o4.timetype='T4'
-            schedule.push(o1)
-            schedule.push(o2)
-            schedule.push(o3)
-            schedule.push(o4)
-            schedule=schedule.filter(element => element!==item)
+        schedule.map((item) => {
+          if (item.timetype === "TM") {
+            let o1 = { ...item };
+            o1.timetype = "T1";
+            let o2 = { ...item };
+            o2.timetype = "T2";
+            let o3 = { ...item };
+            o3.timetype = "T3";
+            let o4 = { ...item };
+            o4.timetype = "T4";
+            schedule.push(o1);
+            schedule.push(o2);
+            schedule.push(o3);
+            schedule.push(o4);
+            schedule = schedule.filter((element) => element !== item);
           }
-          if(item.timetype==='TA')
-          {
-            let o1={...item}
-            o1.timetype='T5'
-            let o2={...item}
-            o2.timetype='T6'
-            let o3={...item}
-            o3.timetype='T7'
-            let o4={...item}
-            o4.timetype='T8'
-            schedule.push(o1)
-            schedule.push(o2)
-            schedule.push(o3)
-            schedule.push(o4)
-            schedule=schedule.filter(element => element!==item)
+          if (item.timetype === "TA") {
+            let o1 = { ...item };
+            o1.timetype = "T5";
+            let o2 = { ...item };
+            o2.timetype = "T6";
+            let o3 = { ...item };
+            o3.timetype = "T7";
+            let o4 = { ...item };
+            o4.timetype = "T8";
+            schedule.push(o1);
+            schedule.push(o2);
+            schedule.push(o3);
+            schedule.push(o4);
+            schedule = schedule.filter((element) => element !== item);
           }
-        })
+        });
         await db.ScheduleForClinics.bulkCreate(schedule);
+
         resolve({
           errCode: 0,
           errMessage: "OKK",
@@ -64,25 +63,31 @@ let bulkCreateSchedulesForDoctors = (data) => {
 let getClinicWeekSchedules = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      if ( !data.clinicId || !data.timetype) {
+      if (!data.clinicId || !data.timetype) {
         resolve({
           errCode: 1,
           errMessage: "Missing required parameters",
         });
       } else {
+        let minDate = moment(new Date())
+          .isoWeekday(7)
+          .startOf("days")
+          .valueOf()
+          .toString();
+        let maxDate = moment(new Date())
+          .isoWeekday(14)
+          .endOf("days")
+          .valueOf()
+          .toString();
+        console.log("minDate: " + minDate + " maxDate: " + maxDate);
 
-        let minDate = moment(new Date()).isoWeekday(7).startOf('days').valueOf().toString()
-        let maxDate = moment(new Date()).isoWeekday(14).endOf('days').valueOf().toString()
-        console.log('minDate: ' + minDate + ' maxDate: ' + maxDate)
-
-        if(data.timetype==='TM')
-        data.timetype='T1'
-        else data.timetype='T5'
+        if (data.timetype === "TM") data.timetype = "T1";
+        else data.timetype = "T5";
         let result = await db.ScheduleForClinics.findAll({
           where: {
             clinicId: data.clinicId,
             date: { [Op.lt]: maxDate, [Op.gt]: minDate },
-            timetype:data.timetype
+            timetype: data.timetype,
           },
           include: [{ model: db.User, attributes: [], as: "doctorData" }],
           attributes: [
@@ -91,13 +96,13 @@ let getClinicWeekSchedules = (data) => {
             "specialtyId",
             "date",
             "timetype",
-            [Sequelize.literal("`doctorData`.`email`"), "UserEmail"],
-            [Sequelize.literal("`doctorData`.`firstName`"), "firstName"],
-            [Sequelize.literal("`doctorData`.`lastName`"), "lastName"],
-            [Sequelize.literal("`doctorData`.`address`"), "address"],
-            [Sequelize.literal("`doctorData`.`phoneNumber`"), "phoneNumber"],
-            [Sequelize.literal("`doctorData`.`image`"), "image"],
-            [Sequelize.literal("`doctorData`.`positionId`"), "positionId"],
+            [Sequelize.literal('"doctorData"."email"'), "UserEmail"],
+            [Sequelize.literal('"doctorData"."firstName"'), "firstName"],
+            [Sequelize.literal('"doctorData"."lastName"'), "lastName"],
+            [Sequelize.literal('"doctorData"."address"'), "address"],
+            [Sequelize.literal('"doctorData"."phoneNumber"'), "phoneNumber"],
+            [Sequelize.literal('"doctorData"."image"'), "image"],
+            [Sequelize.literal('"doctorData"."positionId"'), "positionId"],
           ],
           exclude: [{ model: db.User }],
           raw: true,
@@ -199,7 +204,7 @@ let hashUserPassword = (password) => {
     }
   });
 };
-let getAllDoctorOfHospital = (clinicId, specialtyCode, positionCode) => {
+let getAllDoctorOfHospital = (clinicId) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (!clinicId && !specialtyCode && !positionCode) {
@@ -221,18 +226,18 @@ let getAllDoctorOfHospital = (clinicId, specialtyCode, positionCode) => {
             },
           ],
           attributes: [
-            [Sequelize.literal("`User`.`id`"), "id"],
-            [Sequelize.literal("`User`.`email`"), "UserEmail"],
-            [Sequelize.literal("`User`.`firstName`"), "firstName"],
-            [Sequelize.literal("`User`.`lastName`"), "lastName"],
-            [Sequelize.literal("`User`.`address`"), "address"],
-            [Sequelize.literal("`User`.`phoneNumber`"), "phoneNumber"],
-            // [Sequelize.literal("`User`.`lastName`"+"`User`.`firstName`"), "fullName"],
-            [Sequelize.literal("`User`.`image`"), "image"],
-            [Sequelize.literal("`User`.`gender`"), "gender"],
-            [Sequelize.literal("`User`.`positionId`"), "positionId"],
-            [Sequelize.literal("`specialtyData`.`name`"), "nameSpecialty"],
-            [Sequelize.literal("`specialtyData`.`nameEn`"), "nameSpecialtyEn"],
+            [Sequelize.literal('"User"."id"'), "id"],
+            [Sequelize.literal('"User"."email"'), "UserEmail"],
+            [Sequelize.literal('"User"."firstName"'), "firstName"],
+            [Sequelize.literal('"User"."lastName"'), "lastName"],
+            [Sequelize.literal('"User"."address"'), "address"],
+            [Sequelize.literal('"User"."phoneNumber"'), "phoneNumber"],
+            // [Sequelize.literal('"User"."lastName"'+'"User".firstName"'), "fullName"],
+            [Sequelize.literal('"User"."image"'), "image"],
+            [Sequelize.literal('"User"."gender"'), "gender"],
+            [Sequelize.literal('"User"."positionId"'), "positionId"],
+            [Sequelize.literal('"specialtyData"."name"'), "nameSpecialty"],
+            [Sequelize.literal('"specialtyData"."nameEn"'), "nameSpecialtyEn"],
             "clinicId",
             "specialtyId",
             "count",
@@ -244,26 +249,27 @@ let getAllDoctorOfHospital = (clinicId, specialtyCode, positionCode) => {
           ],
           raw: true,
         });
-        if (specialtyCode !== "All") {
-          if (data && data.length > 0) {
-            data = data.filter((element) => {
-              return element.specialtyId === specialtyCode;
-            });
-          }
-        }
-        if (positionCode !== "All") {
-          if (data && data.length > 0) {
-            data = data.filter((element) => {
-              return element.positionId.toString() === positionCode;
-            });
-          }
-        }
+
+        // if (specialtyCode !== "All") {
+        //   if (data && data.length > 0) {
+        //     data = data.filter((element) => {
+        //       return element.specialtyId === specialtyCode;
+        //     });
+        //   }
+        // }
+        // if (positionCode !== "All") {
+        //   if (data && data.length > 0) {
+        //     data = data.filter((element) => {
+        //       return element.positionId.toString() === positionCode;
+        //     });
+        //   }
+        // }
+
         if (data && data.length > 0) {
           data.map((element) => {
             element.image = new Buffer(element.image, "base64").toString(
               "binary"
             );
-            element.fullName=element.lastName +" "+element.firstName
           });
         }
         if (data) {
@@ -374,8 +380,16 @@ let getSpecialtyDoctorWeeklySchedule = (data) => {
             doctorId: data.doctorId,
           },
         });
-        let minDate=moment(data.currentDate).startOf('days').isoWeekday(0).valueOf().toString()
-        let maxDate=moment(data.currentDate).endOf('days').isoWeekday(7).valueOf().toString()
+        let minDate = moment(data.currentDate)
+          .startOf("days")
+          .isoWeekday(0)
+          .valueOf()
+          .toString();
+        let maxDate = moment(data.currentDate)
+          .endOf("days")
+          .isoWeekday(7)
+          .valueOf()
+          .toString();
         let result = await db.ScheduleForClinics.findAll({
           where: {
             doctorId: data.doctorId,
@@ -396,8 +410,8 @@ let getSpecialtyDoctorWeeklySchedule = (data) => {
             "doctorId",
             "timetype",
             "picked_date",
-            [Sequelize.literal("`timetypeData`.`valueEn`"), "valueEn"],
-            [Sequelize.literal("`timetypeData`.`valueVi`"), "valueVi"],
+            [Sequelize.literal("timetypeData.valueEn"), "valueEn"],
+            [Sequelize.literal("timetypeData.valueVi"), "valueVi"],
           ],
           raw: true,
         });
@@ -426,6 +440,44 @@ let getSpecialtyDoctorWeeklySchedule = (data) => {
     }
   });
 };
+let getBookingScheduleByDateFromHospital = (hospitalId, date) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!hospitalId || !date) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameter",
+        });
+      } else {
+        let bookingByDateFromHospital = await db.Booking.findAll({
+          where: {
+            clinicId: hospitalId,
+            date: date,
+            statusId: "S2",
+          },
+          include: [
+            {
+              model: db.User,
+              as: "patientData",
+              attributes: ["*"],
+            },
+          ],
+        });
+        resolve({
+          errCode:0,
+          errMessage:"OKK",
+          data: bookingByDateFromHospital
+        })
+      }
+    } catch (e) {
+      
+      resolve({
+        errCode:1,
+        errMessage:"Error from server"+e,
+      })
+    }
+  });
+};
 module.exports = {
   bulkCreateSchedulesForDoctors: bulkCreateSchedulesForDoctors,
   getClinicWeekSchedules: getClinicWeekSchedules,
@@ -433,5 +485,6 @@ module.exports = {
   getAllDoctorOfHospital: getAllDoctorOfHospital,
   editDoctorInfor: editDoctorInfor,
   deleteDoctor: deleteDoctor,
-  getSpecialtyDoctorWeeklySchedule:getSpecialtyDoctorWeeklySchedule
+  getSpecialtyDoctorWeeklySchedule: getSpecialtyDoctorWeeklySchedule,
+  getBookingScheduleByDateFromHospital:getBookingScheduleByDateFromHospital
 };

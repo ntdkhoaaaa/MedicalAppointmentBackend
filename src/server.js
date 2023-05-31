@@ -3,13 +3,10 @@ import bodyParser from "body-parser";
 import viewEngine from "./config/viewEngine";
 import initWebRoutes from "./route/web";
 import connectDB from "./config/connectDB";
-import deleteFreshToken from "./config/refreshtoken";
 // const db = require("../app/models")
 // import cors from 'cors';
 
 const cookieParser = require("cookie-parser");
-const schedule = require("node-schedule");
-const cors = require('cors');
 require("dotenv").config();
 let app = express();
 app.use(cookieParser());
@@ -18,6 +15,9 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
+});
+app.listen(port, () => {
+  console.log("Backend Nodejs is running on the port: " + port);
 });
 // app.use(function (req, res, next) {
 //   // Website you wish to allow to connect
@@ -67,8 +67,8 @@ const config = new Configuration({
 });
 const openai = new OpenAIApi(config);
 // const app=express(); co r
-app.use(bodyParser.json());
-app.use(cors());
+// app.use(bodyParser.json());
+// app.use(cors());
 app.post("/chat", async (req, res) => {
   try {
     // Your code here
@@ -86,7 +86,5 @@ app.post("/chat", async (req, res) => {
     console.log(error.message);
   }
 });
-app.listen(port, () => {
-  console.log("Backend Nodejs is running on the port: " + port);
-});
+
 

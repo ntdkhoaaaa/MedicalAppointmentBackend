@@ -11,6 +11,7 @@ import clinicAccountantController from "../controllers/clinicAccountantControlle
 let router = express.Router();
 // let passport = require('passport');
 let initAllWebRoutes = (app) => {
+    console.log('vo day ne 14')
     router.get('/', homeController.getHomePage);
     router.get('/ntdk', homeController.getAboutPage);
     router.get('/crud', homeController.getCRUD);

@@ -17,9 +17,9 @@ app.use((req, res, next) => {
   next();
 });
 let port = process.env.PORT || 6969;
-// app.use('/',(req, res) => {
-//   res.send('helloos')
-// })
+app.use('/',(req, res) => {
+  res.send('helloos')
+})
 app.use(express.json());
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 

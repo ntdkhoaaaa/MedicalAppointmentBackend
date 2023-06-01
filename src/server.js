@@ -17,9 +17,16 @@ app.use((req, res, next) => {
   next();
 });
 let port = process.env.PORT || 6969;
-app.use('/',(req, res) => {
-  res.send('helloos')
-})
+// app.use('/',(req, res) => {
+//   res.send('helloos')
+// })
+app.use(express.json());
+app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
+
+viewEngine(app);
+initWebRoutes(app);
+
+connectDB();
 app.listen(port, () => {
   console.log("Backend Nodejs  " + port);
 });
@@ -51,13 +58,7 @@ app.listen(port, () => {
 // app.use(bodyParser.urlencoded({ extended: true }))
 
 // app.use(bodyParser.json({ limit: "50mb" }));
-app.use(express.json());
-app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 
-viewEngine(app);
-initWebRoutes(app);
-
-connectDB();
 
 // const job = schedule.scheduleJob("59 * * * *", async function async() {
 //   let a = await deleteFreshToken.deleteFreshToken();

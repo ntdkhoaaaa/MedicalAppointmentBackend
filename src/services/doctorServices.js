@@ -386,8 +386,10 @@ let bulkCreateSchedule = (data) => {
           item.currentNumber = 0;
           return item;
         });
-
+        console.log('sao loi quai v 389')
         await db.Schedule.bulkCreate(schedule);
+        console.log('sao loi quai v 391')
+
         resolve({
           errCode: 0,
           errMessage: "OKK",
@@ -487,13 +489,16 @@ let getScheduleByDateContainUserId = (doctorId, date, userId) => {
             doctorId: doctorId,
           },
         });
+        console.log('Found',doctorInfo)
+
         let userScheduleForDate = await db.Booking.findAll({
           where: {
             patientId: userId,
             date: date,
           },
         });
-        console.log('Found',userScheduleForDate,doctorInfo)
+        console.log('Found',userScheduleForDate)
+
         if (userScheduleForDate === []) {
           let dataSchedule = await db.Schedule.findAll({
             where: {

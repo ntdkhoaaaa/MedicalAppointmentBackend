@@ -59,6 +59,7 @@ let postBookingAppointment = (data) => {
               height: data.height,
               clinicId:null
             });
+            console.log('check send mail 62')
             await sendEmailSimple.sendEmailSimple({
               receiverMail: data.email,
               patientName:
@@ -74,6 +75,8 @@ let postBookingAppointment = (data) => {
                 data.fromSpecialtyHospital
               ),
             });
+            console.log('check send mail 78')
+
             resolve({
               errCode: 0,
               errMessage: "Save patient booking success",
@@ -160,6 +163,7 @@ let postVerifyBooking = (data) => {
           },
           raw: false,
         });
+        console.log('check verify appointment 166', appointment);
         if (appointment) {
           appointment.statusId = "S2";
           await appointment.save();
@@ -168,7 +172,7 @@ let postVerifyBooking = (data) => {
               where: {
                 doctorId: data.doctorId,
                 date: appointment.dataValues.date,
-                timeType: appointment.dataValues.timeType,
+                timetype: appointment.dataValues.timeType,
               },
               raw: false,
             });
@@ -185,7 +189,7 @@ let postVerifyBooking = (data) => {
               where: {
                 doctorId: data.doctorId,
                 date: appointment.dataValues.date,
-                timeType: appointment.dataValues.timeType,
+                timetype: appointment.dataValues.timeType,
               },
               raw: false,
             });

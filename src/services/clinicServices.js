@@ -4,8 +4,8 @@ require("dotenv").config();
 import bcrypt from "bcryptjs";
 const salt = bcrypt.genSaltSync(10);
 const Sequelize = require("sequelize");
-const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE
-import _ from 'lodash';
+const MAX_NUMBER_SCHEDULE = process.env.MAX_NUMBER_SCHEDULE;
+import _ from "lodash";
 const { Op } = require("sequelize");
 let postNewClinic = (data) => {
   return new Promise(async (resolve, reject) => {
@@ -132,19 +132,36 @@ let getDetailClinicById = (id) => {
             "nameEn",
             "address",
             "addressEn",
-            "image",
           ],
-
           include: [
             {
               model: db.Doctor_Infor,
               as: "clinicData",
               attributes: { exclude: ["count"] },
+              include: [
+                {
+                  model: db.User,
+                  include:[
+                    {
+                      model:db.Markdown
+                    }
+                  ]
+                },
+              ],
             },
           ],
         });
-        if (data.image) {
-          data.image = new Buffer(data.image, "base64").toString("binary");
+        // if (data.image) {
+        //   data.image = new Buffer(data.image, "base64").toString("binary");
+        // }
+        if (data.clinicData) {
+          data.clinicData.map((item) => {
+            if (item.User.image) {
+              item.User.image = new Buffer(item.User.image, "base64").toString(
+                "binary"
+              );
+            }
+          });
         }
         if (data) {
           resolve({
@@ -187,7 +204,7 @@ let deleteClinicById = (id) => {
     }
   });
 };
-let checkMedicineCode = (medicineCode,clinicId) => {
+let checkMedicineCode = (medicineCode, clinicId) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (!medicineCode) {
@@ -198,7 +215,7 @@ let checkMedicineCode = (medicineCode,clinicId) => {
       } else {
         let data = await db.Medicine.findOne({
           where: {
-            clinicId:clinicId,
+            clinicId: clinicId,
             medicineCode: medicineCode,
           },
         });
@@ -228,29 +245,29 @@ let warningDuplicateMedicine = (data) => {
           errMessage: "Missing required parameters",
         });
       } else {
-        if(data.medicineArr[0].id)
-        {
-          console.log(data.medicineArr[0].id)
+        if (data.medicineArr[0].id) {
+          console.log(data.medicineArr[0].id);
           let checker = await db.Medicine.findOne({
             where: {
-              id:data.medicineArr[0].id
+              id: data.medicineArr[0].id,
             },
           });
-          console.log(checker.medicineCode,data.medicineArr[0].medicineCode)
+          console.log(checker.medicineCode, data.medicineArr[0].medicineCode);
 
-          if(checker.medicineCode===data.medicineArr[0].medicineCode)
-          {
-            console.log(data.medicineArr[0].medicineCode)
+          if (checker.medicineCode === data.medicineArr[0].medicineCode) {
+            console.log(data.medicineArr[0].medicineCode);
             resolve({
               errCode: 0,
               data: {
                 result: false,
               },
             });
-          }
-          else{
-            let res = await checkMedicineCode(data.medicineArr[0].medicineCode,data.clinicId);
-            console.log('alooo',res)
+          } else {
+            let res = await checkMedicineCode(
+              data.medicineArr[0].medicineCode,
+              data.clinicId
+            );
+            console.log("alooo", res);
 
             if (res && res.result === true) {
               resolve({
@@ -259,8 +276,7 @@ let warningDuplicateMedicine = (data) => {
                   result: true,
                 },
               });
-            }
-            else{
+            } else {
               resolve({
                 errCode: 0,
                 data: {
@@ -269,13 +285,15 @@ let warningDuplicateMedicine = (data) => {
               });
             }
           }
-        }
-        else{
+        } else {
           let arrMedicine = data.medicineArr;
           let warningDuplicateMedicine = new Array();
           if (arrMedicine) {
             for (const medicine of arrMedicine) {
-              let res = await checkMedicineCode(medicine.medicineCode,data.clinicId);
+              let res = await checkMedicineCode(
+                medicine.medicineCode,
+                data.clinicId
+              );
               if (res && res.result === true) {
                 warningDuplicateMedicine.push(medicine.medicineCode);
               }
@@ -298,7 +316,6 @@ let warningDuplicateMedicine = (data) => {
             });
           }
         }
-
       }
     } catch (e) {
       reject(e);
@@ -524,13 +541,13 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
             "specialtyId",
             "count",
             "priceId",
-            "note",   
-            "doctorId"
+            "note",
+            "doctorId",
           ],
           exclude: [{ model: db.User }],
           raw: true,
         });
-        console.log('data',data)
+        console.log("data", data);
         if (specialtyCode !== "All") {
           if (data && data.length > 0) {
             data = data.filter((element) => {
@@ -538,11 +555,10 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
             });
           }
         }
-        if(positionCode!=='All')
-        {
+        if (positionCode !== "All") {
           if (data && data.length > 0) {
-            data=data.filter((element) =>{
-              return element.positionId.toString()===positionCode;
+            data = data.filter((element) => {
+              return element.positionId.toString() === positionCode;
             });
           }
         }
@@ -572,26 +588,25 @@ let getAllDoctorOfClinic = (clinicId, specialtyCode, positionCode) => {
 };
 let bulkCreateSchedulesForDoctors = (data) => {
   return new Promise(async (resolve, reject) => {
-      try {
-          if (!data.arrSchedule || !data.clinicId) {
-              resolve({
-                  errCode: 1,
-                  errMessage: 'Missing required parameters'
-              })
-          }
-          else {
-              let schedule=data.arrSchedule
-              await db.schedules_for_clinic.bulkCreate(schedule)
-              resolve({
-                  errCode: 0,
-                  errMessage: 'OKK'
-              })
-          }
-      } catch (e) {
-          reject(e);
+    try {
+      if (!data.arrSchedule || !data.clinicId) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameters",
+        });
+      } else {
+        let schedule = data.arrSchedule;
+        await db.schedules_for_clinic.bulkCreate(schedule);
+        resolve({
+          errCode: 0,
+          errMessage: "OKK",
+        });
       }
-  })
-}
+    } catch (e) {
+      reject(e);
+    }
+  });
+};
 let hashUserPassword = (password) => {
   return new Promise(async (resolve, reject) => {
     try {
@@ -648,18 +663,18 @@ let createNewDoctorForClinic = (data) => {
           },
           attributes: ["id"],
         });
-        let specialtyData=await db.Specialty.findOne({
-          where:{id:data.specialtyId}
-        })
+        let specialtyData = await db.Specialty.findOne({
+          where: { id: data.specialtyId },
+        });
         await db.Doctor_Infor.create({
           doctorId: userId.id,
           specialtyId: data.specialtyId,
           clinicId: data.clinicId,
           count: data.count,
-          note:data.note,
-          priceId:data.selectedPrice,
-          nameSpecialty:specialtyData.name,
-          nameSpecialtyEn:specialtyData.nameEn
+          note: data.note,
+          priceId: data.selectedPrice,
+          nameSpecialty: specialtyData.name,
+          nameSpecialtyEn: specialtyData.nameEn,
         });
         resolve({
           errCode: 0,
@@ -688,17 +703,17 @@ let editDoctorClinicInfor = (data) => {
           doctorId: data.id,
         },
       });
-      let specialtyData=await db.Specialty.findOne({
-        where:{id:data.specialtyId}
-      })
+      let specialtyData = await db.Specialty.findOne({
+        where: { id: data.specialtyId },
+      });
       if (doctorInfor) {
         doctorInfor.specialtyId = data.specialtyId;
         doctorInfor.count = data.count;
-        doctorInfor.nameSpecialty=specialtyData.name;
-        doctorInfor.nameSpecialtyEn=specialtyData.nameEn;
-        doctorInfor.priceId=data.selectedPrice;
-        doctorInfor.note=data.note;
-        doctorInfor.clinicId=data.clinicId;
+        doctorInfor.nameSpecialty = specialtyData.name;
+        doctorInfor.nameSpecialtyEn = specialtyData.nameEn;
+        doctorInfor.priceId = data.selectedPrice;
+        doctorInfor.note = data.note;
+        doctorInfor.clinicId = data.clinicId;
         await doctorInfor.save();
       }
       if (user) {
@@ -768,19 +783,16 @@ let getExtraInforSpecialtyClinic = (specialtyId) => {
           where: {
             id: specialtyId,
           },
-          include:[
+          include: [
             {
               model: db.Allcode,
               as: "priceDataForHospital",
               attributes: ["valueEn", "valueVi"],
             },
-          ]
+          ],
         });
-        if(data)
-        {
-          data.image=new Buffer(data.image, "base64").toString(
-            "binary"
-          );
+        if (data) {
+          data.image = new Buffer(data.image, "base64").toString("binary");
         }
         if (data) {
           resolve({
@@ -800,7 +812,7 @@ let getExtraInforSpecialtyClinic = (specialtyId) => {
   });
 };
 module.exports = {
-  bulkCreateSchedulesForDoctors:bulkCreateSchedulesForDoctors,
+  bulkCreateSchedulesForDoctors: bulkCreateSchedulesForDoctors,
   postNewClinic: postNewClinic,
   getAllClinics: getAllClinics,
   getDetailClinicById: getDetailClinicById,
@@ -815,8 +827,8 @@ module.exports = {
   checkMedicineCode: checkMedicineCode,
   getDetailClinicInAccountantSide: getDetailClinicInAccountantSide,
   getAllDoctorOfClinic: getAllDoctorOfClinic,
-  createNewDoctorForClinic:createNewDoctorForClinic,
-  editDoctorClinicInfor:editDoctorClinicInfor,
-  deleteDoctorClinic:deleteDoctorClinic,
-  getExtraInforSpecialtyClinic:getExtraInforSpecialtyClinic
+  createNewDoctorForClinic: createNewDoctorForClinic,
+  editDoctorClinicInfor: editDoctorClinicInfor,
+  deleteDoctorClinic: deleteDoctorClinic,
+  getExtraInforSpecialtyClinic: getExtraInforSpecialtyClinic,
 };

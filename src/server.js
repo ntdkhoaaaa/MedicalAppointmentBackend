@@ -16,8 +16,9 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   next();
 });
+let port = process.env.PORT || 6969;
 app.listen(port, () => {
-  console.log("Backend Nodejs is running on the port: " + port);
+  console.log("Backend Nodejs  " + port);
 });
 // app.use(function (req, res, next) {
 //   // Website you wish to allow to connect
@@ -54,7 +55,6 @@ viewEngine(app);
 initWebRoutes(app);
 
 connectDB();
-let port = process.env.PORT || 6969;
 
 // const job = schedule.scheduleJob("59 * * * *", async function async() {
 //   let a = await deleteFreshToken.deleteFreshToken();

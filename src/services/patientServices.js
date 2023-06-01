@@ -298,7 +298,7 @@ let cancelBookingformPatient = (bookingId) => {
             {
               model: db.User,
               as: "patientData",
-              attributes: ["email"],
+              attribute: ["email"],
             },
             {
               model: db.User,
@@ -307,9 +307,11 @@ let cancelBookingformPatient = (bookingId) => {
             },
           ],
         });
+        console.log('check console log 310', dataBooking.email)
         if (dataBooking) {
           let difference = dataBooking.date - new Date().getTime();
           let daysDifference = Math.floor(difference / 1000 / 60 / 60 / 24);
+          console.log('check console log 314', dataBooking)
 
           if (daysDifference >= 1) {
             await db.Booking.update(
@@ -322,12 +324,16 @@ let cancelBookingformPatient = (bookingId) => {
                 },
               }
             );
+        console.log('check console log 327', dataBooking)
+
             await sendEmailSimple.sendEmailCancelSchedule({
               receiverMail: dataBooking.patientData.email,
               patientName: dataBooking.forWho,
               time: dataBooking.bookingDate,
               doctorName: `${dataBooking?.doctorInfoData?.lastName} ${dataBooking?.doctorInfoData?.firstName}`,
             });
+        console.log('check console log 335', dataBooking)
+
             resolve({
               errCode: 0,
               errMessage: "delete success",

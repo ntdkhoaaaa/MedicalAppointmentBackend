@@ -232,7 +232,6 @@ let getAllDoctorOfHospital = (clinicId) => {
             [Sequelize.literal('"User"."lastName"'), "lastName"],
             [Sequelize.literal('"User"."address"'), "address"],
             [Sequelize.literal('"User"."phoneNumber"'), "phoneNumber"],
-            // [Sequelize.literal('"User"."lastName"'+'"User".firstName"'), "fullName"],
             [Sequelize.literal('"User"."image"'), "image"],
             [Sequelize.literal('"User"."gender"'), "gender"],
             [Sequelize.literal('"User"."positionId"'), "positionId"],
@@ -242,10 +241,6 @@ let getAllDoctorOfHospital = (clinicId) => {
             "specialtyId",
             "count",
             "doctorId",
-          ],
-          exclude: [
-            { model: db.User },
-            // {model:db.ClinicSpecialty}
           ],
           raw: true,
         });
@@ -267,9 +262,11 @@ let getAllDoctorOfHospital = (clinicId) => {
 
         if (data && data.length > 0) {
           data.map((element) => {
-            element.image = new Buffer(element.image, "base64").toString(
-              "binary"
-            );
+            if (element.image) {
+              element.image = new Buffer(element.image, "base64").toString(
+                "binary"
+              );
+            }
           });
         }
         if (data) {
@@ -464,17 +461,16 @@ let getBookingScheduleByDateFromHospital = (hospitalId, date) => {
           ],
         });
         resolve({
-          errCode:0,
-          errMessage:"OKK",
-          data: bookingByDateFromHospital
-        })
+          errCode: 0,
+          errMessage: "OKK",
+          data: bookingByDateFromHospital,
+        });
       }
     } catch (e) {
-      
       resolve({
-        errCode:1,
-        errMessage:"Error from server"+e,
-      })
+        errCode: 1,
+        errMessage: "Error from server" + e,
+      });
     }
   });
 };
@@ -486,5 +482,5 @@ module.exports = {
   editDoctorInfor: editDoctorInfor,
   deleteDoctor: deleteDoctor,
   getSpecialtyDoctorWeeklySchedule: getSpecialtyDoctorWeeklySchedule,
-  getBookingScheduleByDateFromHospital:getBookingScheduleByDateFromHospital
+  getBookingScheduleByDateFromHospital: getBookingScheduleByDateFromHospital,
 };

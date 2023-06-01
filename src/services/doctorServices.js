@@ -15,7 +15,7 @@ let getTopDoctorHome = (limitInput) => {
   return new Promise(async (resolve, reject) => {
     try {
       let user = await db.User.findAll({
-        limit: limitInput,
+        limit: 1,
         where: { roleId: "R2" },
         order: [["createdAt", "DESC"]],
         attributes: {

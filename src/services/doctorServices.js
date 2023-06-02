@@ -15,7 +15,7 @@ let getTopDoctorHome = (limitInput) => {
   return new Promise(async (resolve, reject) => {
     try {
       let user = await db.User.findAll({
-        limit: 1,
+        limit: 10,
         where: { roleId: "R2" },
         order: [["createdAt", "DESC"]],
         attributes: {
@@ -1309,7 +1309,7 @@ let getScheduleForWeek = (data) => {
     }
   });
 };
-let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId, date) => {
+let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId) => {
   return new Promise(async (resolve, reject) => {
     try {
       if (!clinicId && !specialtyId && !date) {
@@ -1318,12 +1318,15 @@ let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId, date) => {
           errMessage: "Missing required parameter",
         });
       } else {
-        let minDate = moment().valueOf();
-        let maxDate = moment().add(7, "days").valueOf();
+        let minDate = moment().valueOf().toString();
+        let maxDate = moment().add(7, "days").valueOf().toString();
+        console.log('minDate',minDate)
+        console.log('maxDate',maxDate)
+
         let dataSchedule = await db.ScheduleForClinics.findAll({
           where: {
-            date: { [Op.lte]: maxDate, [Op.gte]: minDate },
             clinicId: clinicId,
+            date: { [Op.lte]: maxDate, [Op.gte]: minDate },
             specialtyId: specialtyId,
           },
           include: [
@@ -1352,9 +1355,10 @@ let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId, date) => {
             [Sequelize.literal('"timetypeData"."valueEn"'), "valueEn"],
             [Sequelize.literal('"timetypeData"."valueVi"'), "valueVi"],
           ],
-          group: ["date", "timetype", "doctorId"],
-          order: [["timetype", "ASC"]],
+          groupBy: ["date", "timetype", "doctorId"],
+          // order: [["timetype", "ASC"]],
         });
+        console.log('check schedule',dataSchedule)
         if (!dataSchedule) {
           dataSchedule = [];
           resolve({

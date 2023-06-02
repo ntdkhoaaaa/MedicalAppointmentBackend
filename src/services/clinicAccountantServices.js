@@ -395,8 +395,8 @@ let getSpecialtyDoctorWeeklySchedule = (data) => {
           include: [
             {
               model: db.Allcode,
-              as: "timetypeData",
-              attributes: [],
+              as: "timetypeDataForClinic",
+              attributes: ["valueEn","valueVi"],
             },
           ],
           attributes: [
@@ -407,11 +407,12 @@ let getSpecialtyDoctorWeeklySchedule = (data) => {
             "doctorId",
             "timetype",
             "picked_date",
-            [Sequelize.literal("timetypeData.valueEn"), "valueEn"],
-            [Sequelize.literal("timetypeData.valueVi"), "valueVi"],
+            [Sequelize.col('"timetypeDataForClinic.valueEn"'), "valueEn"],
+            [Sequelize.col('"timetypeDataForClinic.valueVi"'), "valueVi"],
           ],
           raw: true,
         });
+        console.log('checker',result)
         result.map((item) => {
           if (item.currentNumber === 0) {
             item.isBooked = false;

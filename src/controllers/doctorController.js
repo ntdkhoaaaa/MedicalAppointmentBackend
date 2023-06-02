@@ -103,7 +103,7 @@ let getScheduleByDateContainUserId = async (req, res) => {
 }
 let getSpecialtyScheduleByDateContainUserId = async (req, res) => {
     try {
-        let infor = await doctorServices.getSpecialtyScheduleByDateContainUserId(req.query.clinicId,req.query.specialtyId, req.query.date);
+        let infor = await doctorServices.getSpecialtyScheduleByDateContainUserId(req.query.clinicId,req.query.specialtyId);
         return res.status(200).json(infor);
     } catch (e) {
         return res.status(200).json({

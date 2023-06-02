@@ -484,6 +484,7 @@ let updateClinicData = (data) => {
           errMessage: "Missing required parameters!",
         });
       }
+      console.log('qua toi day chua')
       let clinic = await db.Clinics.findOne({
         where: { id: data.id },
       });

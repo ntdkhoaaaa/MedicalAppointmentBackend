@@ -107,6 +107,7 @@ let getClinicWeekSchedules = (data) => {
           exclude: [{ model: db.User }],
           raw: true,
         });
+        console.log('checker',result)
         if (result && result.length > 0) {
           result.map((element) => {
             element.image = new Buffer(element.image, "base64").toString(
@@ -153,7 +154,6 @@ let createNewDoctor = (data) => {
           roleId: "R5",
           positionId: data.positionId,
           image: data.avatar,
-          // statusId: data.statusId,
           clinicId: data.clinicId,
         });
         let userId = await db.User.findOne({

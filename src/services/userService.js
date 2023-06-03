@@ -414,7 +414,6 @@ let handleRegister = (data) => {
 let handleRefreshToken = (data) => {
   return new Promise(async (resolve, reject) => {
     try {
-      console.log('la sao di ha',data)
       let info = await db.Refresh_Token.findOne({
         attributes: ["userId", "refreshToken"],
         where: { refreshToken: data.refreshToken },

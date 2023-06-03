@@ -88,6 +88,8 @@ let initAllWebRoutes = (app) => {
     router.post('/api/get-doctor-week-schedules', doctorController.getScheduleForWeek);
     router.post('/api/get-doctor-specialty-week-schedules', clinicAccountantController.getSpecialtyDoctorWeeklySchedule);
     router.post('/api/get-booking-appointment-from-hospital', clinicAccountantController.getBookingScheduleByDateFromHospital);
+    router.post('/api/get-statistical-for-specialty', clinicAccountantController.getStatisticalForSpecialty);
+    router.post('/api/get-statistical-for-doctor-clinic-specialty', clinicAccountantController.getStatisticalForDoctorClinicSpecialty);
     router.post('/api/create-new-doctor', clinicAccountantController.createNewDoctor);
     router.post('/api/get-all-doctors-hospital', clinicAccountantController.getAllDoctorOfHospital);
     router.post('/api/edit-doctor-hospital', clinicAccountantController.editDoctorInfor);

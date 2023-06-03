@@ -327,7 +327,7 @@ let getDetailedDoctorById = (idInput) => {
           raw: false,
           nest: true,
         });
-        console.log('data checker',data)
+        console.log("data checker", data);
         if (data && data.image) {
           data.image = new Buffer(data.image, "base64").toString("binary");
         } else data = {};
@@ -386,9 +386,9 @@ let bulkCreateSchedule = (data) => {
           item.currentNumber = 0;
           return item;
         });
-        console.log('sao loi quai v 389')
+        console.log("sao loi quai v 389");
         await db.Schedule.bulkCreate(schedule);
-        console.log('sao loi quai v 391')
+        console.log("sao loi quai v 391");
 
         resolve({
           errCode: 0,
@@ -441,7 +441,7 @@ let getScheduleByDate = (doctorId, date) => {
             doctorId: doctorId,
           },
         });
-        console.log('checkdoctor', doctorInfo)
+        console.log("checkdoctor", doctorInfo);
         let dataSchedule = await db.Schedule.findAll({
           where: {
             doctorId: doctorId,
@@ -489,7 +489,7 @@ let getScheduleByDateContainUserId = (doctorId, date, userId) => {
             doctorId: doctorId,
           },
         });
-        console.log('Found',doctorInfo)
+        console.log("Found", doctorInfo);
 
         let userScheduleForDate = await db.Booking.findAll({
           where: {
@@ -497,7 +497,7 @@ let getScheduleByDateContainUserId = (doctorId, date, userId) => {
             date: date,
           },
         });
-        console.log('Found',userScheduleForDate)
+        console.log("Found", userScheduleForDate);
 
         if (userScheduleForDate === []) {
           let dataSchedule = await db.Schedule.findAll({
@@ -553,7 +553,7 @@ let getScheduleByDateContainUserId = (doctorId, date, userId) => {
               "timetype",
             ],
           });
-          console.log('checkkkkkkk',dataSchedule)
+          console.log("checkkkkkkk", dataSchedule);
           if (!dataSchedule) dataSchedule = [];
           for (const element of dataSchedule) {
             let check = userScheduleForDate.find(
@@ -678,7 +678,8 @@ let getProfileDoctorById = (doctorId, checkModal) => {
             include: [
               {
                 model: db.Markdown,
-                attributes: ["description"],
+
+                attributes: ["description", "descriptionNONHTML"],
               },
               {
                 model: db.Allcode,
@@ -736,6 +737,11 @@ let getProfileDoctorById = (doctorId, checkModal) => {
                 attributes: ["valueEn", "valueVi"],
               },
               {
+                model: db.Markdown,
+
+                attributes: ["description", "descriptionNONHTML"],
+              },
+              {
                 model: db.Doctor_Infor,
                 attributes: ["addressClinic", "nameClinic", "nameSpecialty"],
               },
@@ -752,7 +758,7 @@ let getProfileDoctorById = (doctorId, checkModal) => {
               },
             ],
           });
-          console.log("Doctor", doctors)
+          console.log("Doctor", doctors);
           if (doctors) {
             // doctors.forEach(element => {
             //     element.image = new Buffer(element.image, 'base64').toString('binary');
@@ -787,7 +793,7 @@ let getProfileDoctorById = (doctorId, checkModal) => {
           //     data.image = new Buffer(data.image, 'base64').toString('binary');
           // }
           // if (!data) data = {}
-          console.log('check docorr',doctors)
+          console.log("check docorr", doctors);
           resolve({
             errCode: 0,
             data: doctors,
@@ -1320,8 +1326,8 @@ let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId) => {
       } else {
         let minDate = moment().valueOf().toString();
         let maxDate = moment().add(7, "days").valueOf().toString();
-        console.log('minDate',minDate)
-        console.log('maxDate',maxDate)
+        console.log("minDate", minDate);
+        console.log("maxDate", maxDate);
 
         let dataSchedule = await db.ScheduleForClinics.findAll({
           where: {
@@ -1332,8 +1338,8 @@ let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId) => {
           include: [
             {
               model: db.Allcode,
-              as: "timetypeData",
-              attributes: [],
+              as: "timetypeDataForClinic",
+              attributes: ["valueEn","valueVi"],
             },
             {
               model: db.User,
@@ -1352,13 +1358,12 @@ let getSpecialtyScheduleByDateContainUserId = (clinicId, specialtyId) => {
             "maxNumber",
             [Sequelize.literal('"doctorData"."firstName"'), "firstName"],
             [Sequelize.literal('"doctorData"."lastName"'), "lastName"],
-            [Sequelize.literal('"timetypeData"."valueEn"'), "valueEn"],
-            [Sequelize.literal('"timetypeData"."valueVi"'), "valueVi"],
+            [Sequelize.col('"timetypeDataForClinic.valueEn"'), "valueEn"],
+            [Sequelize.col('"timetypeDataForClinic.valueVi"'), "valueVi"],
           ],
           groupBy: ["date", "timetype", "doctorId"],
-          // order: [["timetype", "ASC"]],
         });
-        console.log('check schedule',dataSchedule)
+        console.log("check schedule", dataSchedule);
         if (!dataSchedule) {
           dataSchedule = [];
           resolve({
@@ -1447,7 +1452,8 @@ module.exports = {
   getScheduleByDateFromDoctor: getScheduleByDateFromDoctor,
   getScheduleForWeek: getScheduleForWeek,
   getScheduleByDateContainUserId: getScheduleByDateContainUserId,
-  getSpecialtyScheduleByDateContainUserId:getSpecialtyScheduleByDateContainUserId,
+  getSpecialtyScheduleByDateContainUserId:
+    getSpecialtyScheduleByDateContainUserId,
   getHistoryPatientByDate: getHistoryPatientByDate,
   getListPatientForDoctorWithTimeType: getListPatientForDoctorWithTimeType,
 };

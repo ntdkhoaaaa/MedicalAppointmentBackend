@@ -2,6 +2,7 @@ import db from "../models/index";
 import moment from "moment";
 import { Op } from "sequelize";
 import bcrypt from "bcryptjs";
+import { includes } from "lodash";
 const salt = bcrypt.genSaltSync(10);
 
 require("dotenv").config();
@@ -97,6 +98,7 @@ let getClinicWeekSchedules = (data) => {
             "date",
             "timetype",
             [Sequelize.literal('"doctorData"."email"'), "UserEmail"],
+            [Sequelize.literal('"doctorData"."id"'), "doctorId"],
             [Sequelize.literal('"doctorData"."firstName"'), "firstName"],
             [Sequelize.literal('"doctorData"."lastName"'), "lastName"],
             [Sequelize.literal('"doctorData"."address"'), "address"],
@@ -107,7 +109,7 @@ let getClinicWeekSchedules = (data) => {
           exclude: [{ model: db.User }],
           raw: true,
         });
-        console.log('checker',result)
+        console.log("checker", result);
         if (result && result.length > 0) {
           result.map((element) => {
             element.image = new Buffer(element.image, "base64").toString(
@@ -396,7 +398,7 @@ let getSpecialtyDoctorWeeklySchedule = (data) => {
             {
               model: db.Allcode,
               as: "timetypeDataForClinic",
-              attributes: ["valueEn","valueVi"],
+              attributes: ["valueEn", "valueVi"],
             },
           ],
           attributes: [
@@ -412,7 +414,7 @@ let getSpecialtyDoctorWeeklySchedule = (data) => {
           ],
           raw: true,
         });
-        console.log('checker',result)
+        console.log("checker", result);
         result.map((item) => {
           if (item.currentNumber === 0) {
             item.isBooked = false;
@@ -450,14 +452,27 @@ let getBookingScheduleByDateFromHospital = (hospitalId, date) => {
         let bookingByDateFromHospital = await db.Booking.findAll({
           where: {
             clinicId: hospitalId,
-            date: date,
+            date: date.toString(),
             statusId: "S2",
           },
+          order: [["id", "ASC"]],
           include: [
             {
               model: db.User,
-              as: "patientData",
-              attributes: ["*"],
+              as: "doctorInfoData",
+              attributes: ["email", "lastName", "firstName"],
+              include: [
+                {
+                  model: db.Doctor_Clinic_Specialty,
+                  include: [
+                    {
+                      model: db.ClinicSpecialty,
+                      as: "specialtyData",
+                      attributes: ["name", "nameEn"],
+                    },
+                  ],
+                },
+              ],
             },
           ],
         });
@@ -465,6 +480,110 @@ let getBookingScheduleByDateFromHospital = (hospitalId, date) => {
           errCode: 0,
           errMessage: "OKK",
           data: bookingByDateFromHospital,
+        });
+      }
+    } catch (e) {
+      resolve({
+        errCode: 1,
+        errMessage: "Error from server" + e,
+      });
+    }
+  });
+};
+const _ = require("lodash");
+
+let getStatisticalForSpecialty = (hospitalId, startDate, endDate) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!hospitalId || !startDate || !endDate) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameter",
+        });
+      } else {
+        let bookingByDateFromHospital = await db.Booking.findAll({
+          where: {
+            clinicId: hospitalId,
+            statusId: "S3",
+            date: {
+              [Op.lte]: endDate.toString(),
+              [Op.gte]: startDate.toString(),
+            },
+          },
+          include: [
+            {
+              model: db.ClinicSpecialty,
+              as: "specialtyData",
+              attributes: ["name"],
+            },
+          ],
+          attributes: [
+            "specialtyId",
+            "doctorId",
+            [Sequelize.literal('"specialtyData"."name"'), "nameSpecialty"],
+          ],
+          // group: ["specialtyId"],
+        });
+        const groupedData = _.groupBy(bookingByDateFromHospital, "specialtyId");
+        resolve({
+          errCode: 0,
+          errMessage: "OKK",
+          data: groupedData,
+        });
+      }
+    } catch (e) {
+      resolve({
+        errCode: 1,
+        errMessage: "Error from server" + e,
+      });
+    }
+  });
+};
+let getStatisticalForDoctorClinicSpecialty = (
+  hospitalId,
+  specialtyId,
+  startDate,
+  endDate
+) => {
+  return new Promise(async (resolve, reject) => {
+    try {
+      if (!hospitalId || !startDate || !endDate || !specialtyId) {
+        resolve({
+          errCode: 1,
+          errMessage: "Missing required parameter",
+        });
+      } else {
+        let bookingByDateFromHospital = await db.Booking.findAll({
+          where: {
+            clinicId: hospitalId,
+            statusId: "S3",
+            specialtyId: specialtyId,
+            date: {
+              [Op.lte]: endDate.toString(),
+              [Op.gte]: startDate.toString(),
+            },
+          },
+          include:[
+            {
+              model: db.User,
+              as: "doctorInfoData",
+              attributes: [ "lastName", "firstName"],
+            }
+          ],
+          attributes: [
+            "doctorId",
+             "patientId",
+            [Sequelize.literal('"doctorInfoData"."lastName"'), "lastName"],
+            [Sequelize.literal('"doctorInfoData"."firstName"'), "firstName"],
+
+            ],
+          // group: ["specialtyId"],
+        });
+        const groupedData = _.groupBy(bookingByDateFromHospital, "doctorId");
+        resolve({
+          errCode: 0,
+          errMessage: "OKK",
+          data: groupedData,
         });
       }
     } catch (e) {
@@ -484,4 +603,7 @@ module.exports = {
   deleteDoctor: deleteDoctor,
   getSpecialtyDoctorWeeklySchedule: getSpecialtyDoctorWeeklySchedule,
   getBookingScheduleByDateFromHospital: getBookingScheduleByDateFromHospital,
+  getStatisticalForSpecialty: getStatisticalForSpecialty,
+  getStatisticalForDoctorClinicSpecialty:
+    getStatisticalForDoctorClinicSpecialty,
 };

@@ -13,7 +13,7 @@ module.exports = (sequelize, DataTypes) => {
             ClinicSpecialty.belongsTo(models.Clinics, { foreignKey: 'clinicId',targetKey:'id', as: 'clinicData' })
             // define association here
             ClinicSpecialty.belongsTo(models.Allcode, { foreignKey: 'priceId', targetKey: 'keyMap', as: 'priceDataForHospital' })
-
+            ClinicSpecialty.hasMany(models.Booking, { foreignKey: 'specialtyId', as: 'bookingSpecialtyData' })
             ClinicSpecialty.hasMany(models.Doctor_Infor, { foreignKey: 'specialtyId', as: 'ClinicSpecialtyData' })
         }
     };

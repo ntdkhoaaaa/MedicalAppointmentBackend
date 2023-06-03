@@ -13,8 +13,11 @@ module.exports = (sequelize, DataTypes) => {
             Booking.belongsTo(models.User, { foreignKey: 'patientId', targetKey: 'id', as: 'patientData' })
             Booking.belongsTo(models.Allcode, { foreignKey: 'timeType', targetKey: 'keyMap', as: 'timeTypeDataPatient' })
             Booking.belongsTo(models.User, { foreignKey: 'doctorId', targetKey: 'id', as: 'doctorInfoData' })
+            Booking.belongsTo(models.ClinicSpecialty, { foreignKey: 'specialtyId', targetKey: 'id', as: 'specialtyData' })
+
             Booking.hasOne(models.History, { foreignKey: 'bookingId' })
             Booking.hasOne(models.Rating, { foreignKey: 'bookingId' })
+
 
         }
     };

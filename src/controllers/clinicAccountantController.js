@@ -78,7 +78,32 @@ let getSpecialtyDoctorWeeklySchedule = async (req, res) => {
 }
 let getBookingScheduleByDateFromHospital = async (req, res) => {
     try {
+        console.log("Getting booking", req.body)
         let infor = await clinicAccountantServices.getBookingScheduleByDateFromHospital(req.body.hospitalId,req.body.date);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+let getStatisticalForSpecialty = async (req, res) => {
+    try {
+        console.log("Getting booking qs", req.body)
+        let infor = await clinicAccountantServices.getStatisticalForSpecialty(req.body.hospitalId,req.body.startDate,req.body.endDate);
+        return res.status(200).json(infor);
+    } catch (e) {
+        return res.status(200).json({
+            errCode: -1,
+            errMessage: 'Error from server'+e
+        })
+    }
+}
+let getStatisticalForDoctorClinicSpecialty = async (req, res) => {
+    try {
+        console.log("Getting booking qs", req.body)
+        let infor = await clinicAccountantServices.getStatisticalForDoctorClinicSpecialty(req.body.hospitalId,req.body.specialtyId,req.body.startDate,req.body.endDate);
         return res.status(200).json(infor);
     } catch (e) {
         return res.status(200).json({
@@ -95,5 +120,7 @@ module.exports ={
     editDoctorInfor:editDoctorInfor,
     handleDeleteUser:handleDeleteUser,
     getSpecialtyDoctorWeeklySchedule:getSpecialtyDoctorWeeklySchedule,
-    getBookingScheduleByDateFromHospital:getBookingScheduleByDateFromHospital
+    getBookingScheduleByDateFromHospital:getBookingScheduleByDateFromHospital,
+    getStatisticalForSpecialty:getStatisticalForSpecialty,
+    getStatisticalForDoctorClinicSpecialty:getStatisticalForDoctorClinicSpecialty
 }

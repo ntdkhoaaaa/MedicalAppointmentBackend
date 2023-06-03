@@ -68,7 +68,7 @@ app.listen(port, () => {
 // const bodyParser = require('body-parser');
 const { Configuration, OpenAIApi } = require("openai");
 const config = new Configuration({
-  apiKey: "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",
+  apiKey: "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",
 });
 const openai = new OpenAIApi(config);
 // const app=express(); co r

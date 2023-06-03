@@ -21,6 +21,9 @@ let port = process.env.PORT || 6969;
 //   // res.send('helloos')
 
 // })
+// const bodyParser = require('body-parser');
+
+app.use(bodyParser.json({ limit: "50mb" }));
 app.use(express.json());
 app.use(bodyParser.urlencoded({ limit: "50mb", extended: true }));
 viewEngine(app);
@@ -55,17 +58,13 @@ app.listen(port, () => {
 //   next();
 // });
 
-// app.use(bodyParser.json());
-// app.use(bodyParser.urlencoded({ extended: true }))
 
-// app.use(bodyParser.json({ limit: "50mb" }));
 
 
 // const job = schedule.scheduleJob("59 * * * *", async function async() {
 //   let a = await deleteFreshToken.deleteFreshToken();
 // });
 
-// const bodyParser = require('body-parser');
 const { Configuration, OpenAIApi } = require("openai");
 const config = new Configuration({
   apiKey: "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",
